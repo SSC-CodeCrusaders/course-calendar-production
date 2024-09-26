@@ -31,7 +31,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: |
+            ./             # Include current directory
+            !**/node_modules/**  # Exclude node_modules
+            !**/dist/**          # Exclude dist (build folder)
+            !.git/**             # Exclude .git folder
+            !.vscode/**          # Exclude VSCode config files
 
   deploy:
     runs-on: ubuntu-latest
@@ -62,4 +67,3 @@ jobs:
           app-name: 'course-calendar'
           slot-name: 'Production'
           package: .
-          
