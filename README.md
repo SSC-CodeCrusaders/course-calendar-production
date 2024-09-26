@@ -12,6 +12,7 @@ For more information please view our MVP [here](./mvp.md).
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Team Workflow](#team-workflow)
+- [Definition of Done](#definition-of-done)
 - [Team Members](#team-members)
 - [License](#license)
 
@@ -63,6 +64,13 @@ Please follow these steps for any contributions:
   Example: fix: correct the navigation issue
   ```
 - **Code Reviews**: Before merging any pull request into `main`, it must undergo a review by at least one other team member.
+
+## Definition of Done
+
+### Our Definition of "Done":
+- Each story must be deployed to production & demo-able by **10:59pm on the Sunday at the end of each sprint**.
+- "Done" stories should ensure existing logic is still working correctly.
+
 
 ## Team Members
 
