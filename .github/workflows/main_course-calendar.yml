@@ -12,7 +12,7 @@ jobs:
 
     steps:
       # Checkout the repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       # Set up Node.js version 18.x
       - name: Set up Node.js version
@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: '18.x'
 
+      # Install dependencies, build, and test the app
       - name: npm install, build, and test
         run: |
           cd app
@@ -27,12 +28,13 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      # Upload the built app directory as an artifact for the deployment job
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           path: |
-            app/**/*
+            app/**/*  # Upload everything in the app directory except exclusions
             !app/node_modules/**
             !app/.git/**
 
@@ -46,11 +48,13 @@ jobs:
       id-token: write
 
     steps:
+      # Download the built app artifact from the build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
+
+      # Log in to Azure
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -65,4 +69,4 @@ jobs:
         with:
           app-name: 'course-calendar'
           slot-name: 'Production'
-          package: ./app  # Correctly points to the app directory where the app was built
+          package: ./  # Ensure it deploys everything from the downloaded artifact's root
