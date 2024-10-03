@@ -11,29 +11,32 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      # Checkout the repository
       - uses: actions/checkout@v4
 
+      # Set up Node.js version 18.x
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
 
+      # Install dependencies, build, and test the app (inside the app directory)
       - name: npm install, build, and test
         run: |
+          cd app
           npm install
           npm run build --if-present
           npm run test --if-present
       
+      # Upload the build artifacts for the deployment job (from the app directory)
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           path: |
-            ./
-            !**/node_modules/**
-            !**/dist/**
-            !.git/**
-            !.vscode/**
+            app/**/*
+            !app/node_modules/**
+            !app/.git/**
 
   deploy:
     runs-on: windows-latest 
@@ -45,22 +48,25 @@ jobs:
       id-token: write
 
     steps:
+      # Download the artifact created by the build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
       
+      # Log in to Azure
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5A5BBA17D8A34BB8B6EA671C02B31A89 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6CCF72118AAF4AD1AD99279C90DD5CB9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2FE7DA45C13A4CDC93BB0A5D1AD17231 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
+      # Deploy to Azure Web App
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'course-calendar'
           slot-name: 'Production'
-          package: .
+          package: app  # Correctly points to the app directory where the app was built
