@@ -20,15 +20,13 @@ jobs:
         with:
           node-version: '18.x'
 
-      # Install dependencies, build, and test the app (inside the app directory)
       - name: npm install, build, and test
         run: |
           cd app
           npm install
           npm run build --if-present
           npm run test --if-present
-      
-      # Upload the build artifacts for the deployment job (from the app directory)
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -48,13 +46,11 @@ jobs:
       id-token: write
 
     steps:
-      # Download the artifact created by the build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
       
-      # Log in to Azure
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -69,4 +65,4 @@ jobs:
         with:
           app-name: 'course-calendar'
           slot-name: 'Production'
-          package: app  # Correctly points to the app directory where the app was built
+          package: ./app  # Correctly points to the app directory where the app was built
