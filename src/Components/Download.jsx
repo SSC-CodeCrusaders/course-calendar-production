@@ -1,7 +1,7 @@
 const Download = () => {
   return (
     <div>
-      <h1>Download</h1>
+      <h1>Future Page for Extension Download</h1>
     </div>
   );
 };
