@@ -22,7 +22,6 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          cd app
           npm install
           npm run build --if-present
           npm run test --if-present
@@ -32,12 +31,12 @@ jobs:
         with:
           name: node-app
           path: |
-            app/**/*
-            !app/node_modules/**
-            !app/.git/**
+            ./**/*  # Look in the root directory for the build files
+            !node_modules/**
+            !.git/**
 
   deploy:
-    runs-on: windows-latest 
+    runs-on: windows-latest
     needs: build
     environment:
       name: 'Production'
@@ -65,4 +64,4 @@ jobs:
         with:
           app-name: 'course-calendar'
           slot-name: 'Production'
-          package: ./  
+          package: ./  # Deploy from the root directory
