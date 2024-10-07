@@ -59,20 +59,20 @@ Our CI/CD pipeline is set up using GitHub and Azure to automate the deployment p
 Workflow Overview
 
    Staging Branch:
-        All new features and changes are pushed to the staging branch.
-        This branch is used for manual testing and verification before any code is merged into the main branch.
-        Developers can use the staging environment to ensure that all changes are functioning as expected.
+   - All new features and changes are pushed to the staging branch.
+   - This branch is used for manual testing and verification before any code is merged into the main branch.
+   - Developers can use the staging environment to ensure that all changes are functioning as expected.
 
    Main Branch:
-        Once changes are reviewed and tested on the staging branch, they are merged into the main branch.
-        Deployment Trigger: Pushing to the main branch automatically triggers a GitHub Action that deploys the latest version of the application to the production environment on Azure.
-        No further manual steps are required for production deployment, ensuring a streamlined process.
+   - Once changes are reviewed and tested on the staging branch, they are merged into the main branch.
+   - Deployment Trigger: Pushing to the main branch automatically triggers a GitHub Action that deploys the latest version of the application to the production environment on Azure.
+   - No further manual steps are required for production deployment, ensuring a streamlined process.
 
 Summary:
 
-   Staging Environment: Used for manual testing.
-   Production Deployment: Automatically triggered upon merging to main.
-   Deployment Platform: Azure is used for hosting the live version of the application.
+   - Staging Environment: Used for manual testing.
+   - Production Deployment: Automatically triggered upon merging to main.
+   - Deployment Platform: Azure is used for hosting the live version of the application.
 
 ## Team Workflow
 
