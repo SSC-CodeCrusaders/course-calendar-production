@@ -38,7 +38,7 @@ jobs:
             !.git/**
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     environment:
       name: 'Staging'
@@ -66,4 +66,4 @@ jobs:
         with:
           app-name: 'course-calendar-staging'
           slot-name: 'Production'
-          package: ./dist 
+          package: ./ 
