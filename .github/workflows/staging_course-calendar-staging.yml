@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - course-calendar-staging
 
 on:
@@ -14,26 +11,22 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # Set up Node.js version 20.x
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      - name: npm install, build, and test
+      - name: Install dependencies and build
         run: |
           npm install
-          # Debug: Check npm version and Vite configuration
           npm -v
           npm list vite
-          # Run the build command
           npm run build --if-present
-          # Debug: List the root directory to confirm files
           echo "Root Directory after Build:"
           ls -R
-          # Check if the dist directory exists and its contents
           echo "Contents of 'dist' Directory:"
           if [ -d "dist" ]; then
             ls -R dist
@@ -53,13 +46,12 @@ jobs:
 
   deploy:
     runs-on: windows-latest
-    runs-on: windows-latest
     needs: build
     environment:
-      name: 'Staging'  # Change environment name to 'Staging'
+      name: 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # This is required for requesting the JWT
+      id-token: write
 
     steps:
       - name: Download artifact from build job
@@ -74,11 +66,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_048194D5069B4249828D4B7CC858A474 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_56A802B64D52461685CD0BDF215EADC8 }}
 
-      # Deploy to Azure Web App
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'course-calendar-staging'
           slot-name: 'Production'
-          package: ./dist  # Deploying from the dist directory, not root
+          package: ./dist
