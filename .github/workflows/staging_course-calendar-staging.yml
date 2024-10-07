@@ -1,3 +1,6 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy Node.js app to Azure Web App - course-calendar-staging
 
 on:
@@ -11,23 +14,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Checkout the repository
       - uses: actions/checkout@v4
 
-      # Set up Node.js version
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      # Install dependencies, build, and test
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
+          # Add a debug step to check where the build files are generated
+          ls -R # List all files and directories to verify the build output
 
-      # Upload the build output as an artifact
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -41,10 +42,10 @@ jobs:
     runs-on: windows-latest
     needs: build
     environment:
-      name: 'Staging'
+      name: 'Staging'  # Change environment name to 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -65,5 +66,5 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'course-calendar-staging'
-          slot-name: 'Production'
-          package: ./ 
+          slot-name: 'Production'  # You can set this to 'staging' if you are using slots
+          package: ./dist  # Package path should point to the build output directory
