@@ -11,29 +11,20 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      # Checkout the repository
+      - uses: actions/checkout@v4
 
+      # Set up Node.js version 18.x
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      - name: Install dependencies and build
+      - name: npm install, build, and test
         run: |
           npm install
-          npm -v
-          npm list vite
           npm run build --if-present
-          echo "Root Directory after Build:"
-          ls -R
-          echo "Contents of 'dist' Directory:"
-          if [ -d "dist" ]; then
-            ls -R dist
-          else
-            echo "'dist' directory not found!"
-            exit 1
-          fi
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -48,7 +39,7 @@ jobs:
     runs-on: windows-latest
     needs: build
     environment:
-      name: 'Staging'
+      name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write
@@ -58,18 +49,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_02553D04CFF24FDB889A5DB08761859B }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_048194D5069B4249828D4B7CC858A474 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_56A802B64D52461685CD0BDF215EADC8 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5A5BBA17D8A34BB8B6EA671C02B31A89 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6CCF72118AAF4AD1AD99279C90DD5CB9 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2FE7DA45C13A4CDC93BB0A5D1AD17231 }}
 
+      # Deploy to Azure Web App
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'course-calendar-staging'
           slot-name: 'Production'
-          package: ./dist
+          package: ./  # Deploy from the root directory
