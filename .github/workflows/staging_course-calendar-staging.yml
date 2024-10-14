@@ -1,56 +1,62 @@
-name: Build and deploy Node.js app to Azure Web App - course-calendar-staging
+name: Build and deploy Node.js app to Azure Web App - course-calendar
+
 on:
   push:
     branches:
+      - main
       - staging
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
+      
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
+
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
-      
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           path: |
-            dist/**/*  
+            dist/**/*
             !node_modules/**
             !.git/**
+
   deploy:
     runs-on: windows-latest
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write 
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_02553D04CFF24FDB889A5DB08761859B }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_048194D5069B4249828D4B7CC858A474 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_56A802B64D52461685CD0BDF215EADC8 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'course-calendar-staging'
-          slot-name: 'Production'
-          package: .
+          app-name: ${{ github.ref == 'refs/heads/main' && 'course-calendar' || 'course-calendar-staging' }}
+          slot-name: 'Production' 
+          package: ./
+        env:
+          environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}
