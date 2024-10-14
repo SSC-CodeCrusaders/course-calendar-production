@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Ignore staging workflow file in the main branch
-azure-pipelines-staging.yml
+# Ignore main workflow file in the staging branch
+main_lewiscal.yml
