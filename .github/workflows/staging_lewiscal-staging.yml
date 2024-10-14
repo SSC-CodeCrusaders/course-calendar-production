@@ -61,5 +61,5 @@ jobs:
         with:
           app-name: 'lewiscal-staging'
           slot-name: 'Production'
-          package: .
+          package: ./
           
