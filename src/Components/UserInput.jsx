@@ -76,54 +76,86 @@ const DatePicker = () => {
   };
 
   return (
-    <div>
-      <h1>Class Schedule Creator</h1>
-      <label htmlFor="calendar">Select date from </label>
-      <input type="date" value={firstDay} onChange={(e) => setFirstDay(e.target.value)} />
-      <label htmlFor="calendar"> to </label>
-      <input type="date" value={lastDay} onChange={(e) => setLastDay(e.target.value)} />
-      <br />
+    <div className="bg-lewisRed min-h-screen flex flex-col items-center justify-center">
+      <h1 className="text-white text-3xl font-bold mb-8 text-center">Class Schedule Creator</h1>
 
-      <label htmlFor="class_time">Class Time: </label>
-      <input type="time" value={classTime} onChange={(e) => setClassTime(e.target.value)} />
-      <br />
-
-      <h2>Days of class:</h2>
-      {Object.keys(daysOfClass).map((day, index) => (
-        <div key={index}>
-          <label htmlFor={day}>{day.charAt(0).toUpperCase() + day.slice(1)}</label>
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl text-center">
+        <div className="mb-4 w-full flex justify-center items-center">
+          <label htmlFor="calendar" className="mr-4">Start of Course Date: </label>
           <input
-            type="checkbox"
-            id={day}
-            checked={daysOfClass[day]}
-            onChange={() => handleDayChange(day)}
+            type="date"
+            value={firstDay}
+            onChange={(e) => setFirstDay(e.target.value)}
+            className="p-2 border rounded text-center"
           />
         </div>
-      ))}
+        <div className="mb-4 w-full flex justify-center items-center">
+          <label htmlFor="calendar" className="mr-4">End of Course Date:</label>
+          <input
+            type="date"
+            value={lastDay}
+            onChange={(e) => setLastDay(e.target.value)}
+            className="p-2 border rounded text-center"
+          />
+        </div>
+        <h2 className="text-center mb-4">Course Dates:</h2>
+        <div className="mb-4 flex-wrap flex justify-center items-center">
+          {Object.keys(daysOfClass).map((day, index) => (
+            <div key={index} className="mr-4 flex items-center">
+              <label htmlFor={day} className="mr-2">{day.charAt(0).toUpperCase() + day.slice(1)}</label>
+              <input
+                type="checkbox"
+                id={day}
+                checked={daysOfClass[day]}
+                onChange={() => handleDayChange(day)}
+                className="form-checkbox"
+              />
+            </div>
+          ))}
+        </div>
 
-      <br />
-      <label htmlFor="instructor_name">Instructor Name: </label>
-      <input
-        type="text"
-        value={instructorName}
-        onChange={(e) => setInstructorName(e.target.value)}
-      />
-      <br />
-      <label htmlFor="class_name">Name of Class: </label>
-      <input
-        type="text"
-        value={className}
-        onChange={(e) => setClassName(e.target.value)}
-      />
-      <br />
-      <label htmlFor="location">Location: </label>
-      <input
-        type="text"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-      />
-      <br />
-      <button onClick={createICS}>Create ICS</button>
+        <br />
+        <div className="mb-4 w-full flex justify-center items-center">
+          <label htmlFor="instructor_name" className="mr-4">Instructor Name: </label>
+          <input
+            type="text"
+            value={instructorName}
+            onChange={(e) => setInstructorName(e.target.value)}
+            className="p-2 border rounded text-center"
+          />
+        </div>
+
+        <br />
+        <div className="mb-4 w-full flex justify-center items-center">
+          <label htmlFor="class_name" className="mr-4">Course Name: </label>
+          <input
+            type="text"
+            value={className}
+            onChange={(e) => setClassName(e.target.value)}
+            className="p-2 border rounded text-center"
+          />
+        </div>
+
+        <br />
+        <div className="mb-4 w-full flex justify-center items-center">
+          <label htmlFor="location" className="mr-4">Course Location: </label>
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="p-2 border rounded text-center"
+          />
+        </div>
+        <br />
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={createICS}
+            className="bg-white text-lewisRed p-2 rounded border border-lewisRed shadow hover:bg-lewisRed hover:text-white transition duration-300"
+          >
+            Create .ICS
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
