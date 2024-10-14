@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Ignore staging workflow file in the main branch
+# Ignore workflow files
+main_lewiscal.yml
 staging_lewiscal-staging.yml
