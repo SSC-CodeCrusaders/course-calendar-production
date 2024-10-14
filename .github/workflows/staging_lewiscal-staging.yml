@@ -1,9 +1,12 @@
-name: Build and deploy Node.js app to Azure Web App - course-calendar
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js app to Azure Web App - lewiscal-staging
 
 on:
   push:
     branches:
-      - main
+      - staging
   workflow_dispatch:
 
 jobs:
@@ -11,10 +14,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Checkout the repository
       - uses: actions/checkout@v4
 
-      # Set up Node.js version 18.x
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
@@ -25,24 +26,21 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
-
+      
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            dist/**/*  
-            !node_modules/**
-            !.git/**
+          path: .
 
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write
+      id-token: write #This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -53,15 +51,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5A5BBA17D8A34BB8B6EA671C02B31A89 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6CCF72118AAF4AD1AD99279C90DD5CB9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2FE7DA45C13A4CDC93BB0A5D1AD17231 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_EA9A7A7AA5584C938EA806A33F80BFC9 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5C0A23A2A2A84A39B9EA61B175957965 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_CC71D23D34744DD5B1C63047163DE7C4 }}
 
-      # Deploy to Azure Web App
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'course-calendar'
+          app-name: 'lewiscal-staging'
           slot-name: 'Production'
-          package: ./  # Deploy from the root directory
+          package: ./
+          
