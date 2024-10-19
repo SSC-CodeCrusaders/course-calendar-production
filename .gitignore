@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ignore workflow files
+main_lewiscal.yml
+staging_lewiscal-staging.yml

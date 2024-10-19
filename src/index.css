@@ -4,26 +4,46 @@
 
 /* Custom global styles */
 body {
-  font-family: "Arial", sans-serif; 
+  font-family: "Arial", sans-serif;
   background-color: #ffffff;
 }
 
-.text-primary {
-  color: #a6192e; /* Primary color */
+.text-lewisRed {
+  color: #940731;
+  /* Primary color */
 }
 
-.bg-primary {
-  background-color: #a6192e; /* Primary background */
+.bg-lewisRed {
+  background-color: #940731;
+  /* Primary background */
 }
 
 .bg-secondary {
-  background-color: #8a1c1e; /* Secondary background */
+  background-color: #8a1c1e;
+  /* Secondary background */
 }
 
 .text-secondary {
-  color: #8a1c1e; /* Secondary color */
+  color: #8a1c1e;
+  /* Secondary color */
 }
 
 .text-gray {
-  color: #d9d9d9; /* Gray text */
+  color: #d9d9d9;
+  /* Gray text */
+}
+
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
+
+.center-content {
+  width: 100%;
+  max-width: fit-content;
+  padding: 20px;
+  box-sizing: border-box;
 }
