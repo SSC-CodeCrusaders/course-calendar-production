@@ -1,12 +1,36 @@
 import { Link } from "react-router-dom";
+import { supabase } from '../utils/supabaseClient';
+import { useEffect, useState } from 'react';
 
 const Header = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Use the updated getSession method
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user ?? null);
+    };
+
+    getSession();
+
+    // Use onAuthStateChange to listen for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Cleanup the listener when the component is unmounted
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <nav className="bg-primary text-white py-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
         <h1 className="text-2xl font-bold">LewisCal</h1>
-        <div className="space-x-6">
-        <Link className="hover:text-gray" to="/">
+        <div className="space-x-6 flex items-center">
+          <Link className="hover:text-gray" to="/">
             Home
           </Link>
           <Link className="hover:text-gray" to="/download">
@@ -20,6 +44,24 @@ const Header = () => {
           >
             Info
           </a>
+          {!user ? (
+            <Link className="hover:text-gray" to="/auth">
+              Log In / Sign Up
+            </Link>
+          ) : (
+            <>
+              <span className="text-sm mr-4">Welcome, {user.email}</span>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  setUser(null);
+                }}
+                className="bg-red-500 px-4 py-2 rounded hover:bg-red-700 transition"
+              >
+                Sign Out
+              </button>
+            </>
+          )}
         </div>
       </div>
     </nav>
