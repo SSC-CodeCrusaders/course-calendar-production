@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
-const Header = () => {
-  const [user, setUser] = useState(null);
-
+const Header = ({ user, setUser }) => {
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -20,12 +18,19 @@ const Header = () => {
     return () => {
       authListener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [setUser]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null); // Update user state to null on sign-out
+  };
 
   return (
-    <nav className="bg-lewisRed text-white  py-4 shadow-md">
+    <nav className="bg-lewisRed text-white py-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold">LewisCal</h1>
+        <h1 className="text-2xl font-bold">
+          <Link to="/">LewisCal</Link>
+        </h1>
         <div className="space-x-6 flex items-center">
           <Link className="hover:text-gray" to="/">
             Home
@@ -47,13 +52,18 @@ const Header = () => {
             </Link>
           ) : (
             <>
-              <span className="text-sm mr-4">Welcome, {user.email}</span>
+              {/* Display user email and greeting */}
+              <span className="text-sm">Welcome, {user.email}</span>
+              
+              {/* Profile link for logged-in users */}
+              <Link className="hover:text-gray ml-4" to="/profile">
+                Profile
+              </Link>
+
+              {/* Sign Out Button */}
               <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  setUser(null);
-                }}
-                className="bg-red-500 px-4 py-2 rounded hover:bg-red-700 transition"
+                onClick={handleSignOut}
+                className="bg-red-500 px-4 py-2 rounded hover:bg-red-700 transition ml-4"
               >
                 Sign Out
               </button>
