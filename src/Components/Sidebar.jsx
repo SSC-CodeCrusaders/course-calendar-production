@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';  // Use only Routes and Route, no Router here
 import UserInputForm from './UserInputForm';
+import ProgressBar from './ProgressBar';  // ProgressBar component
+import DisplayDays from './CalendarPage';  // Step 2 component
+import SummaryPage from './LinkPage';      // Step 3 component
 
 const Sidebar = () => {
   const defaultCalendar = {
@@ -20,7 +24,6 @@ const Sidebar = () => {
     location: '',
   };
 
-  // Load calendars from localStorage or initialize with one default calendar
   const [calendars, setCalendars] = useState(() => {
     const storedCalendars = localStorage.getItem('calendars');
     return storedCalendars ? JSON.parse(storedCalendars) : [defaultCalendar];
@@ -31,33 +34,28 @@ const Sidebar = () => {
     return storedIndex ? JSON.parse(storedIndex) : 0;
   });
 
-  // Save the calendars array to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('calendars', JSON.stringify(calendars));
   }, [calendars]);
 
-  // Save the current index to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
   }, [currentIndex]);
 
-  // Toggle function to open/close the sidebar
-  const [isOpen, setIsOpen] = useState(true); // Initialize sidebar open/close state
+  const [isOpen, setIsOpen] = useState(true);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
-  // Set the current index and switch the displayed calendar
   const selectCalendar = (index) => {
-    setCurrentIndex(index); // Update the current calendar index
+    setCurrentIndex(index);
   };
 
-  // Create a new calendar
   const createNewCal = () => {
     const updatedCalendars = [...calendars, defaultCalendar];
     setCalendars(updatedCalendars);
-    setCurrentIndex(updatedCalendars.length - 1); // Automatically switch to the new calendar
+    setCurrentIndex(updatedCalendars.length - 1);
   };
 
   return (
@@ -68,7 +66,6 @@ const Sidebar = () => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Sidebar Header */}
         <h2 className="text-white text-xl font-semibold mb-6">Your Calendars</h2>
 
         {/* List of Calendars */}
@@ -109,9 +106,19 @@ const Sidebar = () => {
         {isOpen ? 'Close' : 'Open'}
       </button>
 
-      {/* UserInputForm */}
+      {/* Routes for Form Steps */}
       <div className="w-full">
-        <UserInputForm currentIndex={currentIndex} calendars={calendars} setCalendars={setCalendars} />
+        <Routes>  {/* Define routes for each step */}
+          <Route
+            path="/step1"
+            element={<UserInputForm currentIndex={currentIndex} calendars={calendars} setCalendars={setCalendars} />}
+          />
+          <Route path="/step2" element={<DisplayDays />} />
+          <Route path="/step3" element={<SummaryPage />} />
+        </Routes>
+
+        {/* ProgressBar */}
+        <ProgressBar />
       </div>
     </>
   );
