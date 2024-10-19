@@ -6,10 +6,7 @@ export default function App() {
       <Router>
         <Header />
         <Routes>
-          <Route 
-            path="/" element={ <><Sidebar/></>
-        } 
-        />
+        <Route path="/*" element={<Sidebar />} />  {/* Sidebar handles its own routing */}
         </Routes>
       </Router>
   );
