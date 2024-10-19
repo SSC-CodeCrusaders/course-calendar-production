@@ -58,21 +58,23 @@ Please follow these steps for any contributions:
 Our CI/CD pipeline is set up using GitHub and Azure to automate the deployment process. The workflow is structured as follows:
 Workflow Overview
 
-   Staging Branch:
-   - All new features and changes are pushed to the staging branch.
-   - This branch is used for manual testing and verification before any code is merged into the main branch.
-   - Developers can use the staging environment to ensure that all changes are functioning as expected.
+Staging Branch:
 
-   Main Branch:
-   - Once changes are reviewed and tested on the staging branch, they are merged into the main branch.
-   - Deployment Trigger: Pushing to the main branch automatically triggers a GitHub Action that deploys the latest version of the application to the production environment on Azure.
-   - No further manual steps are required for production deployment, ensuring a streamlined process.
+- All new features and changes are pushed to the staging branch.
+- This branch is used for manual testing and verification before any code is merged into the main branch.
+- Developers can use the staging environment to ensure that all changes are functioning as expected.
+
+Main Branch:
+
+- Once changes are reviewed and tested on the staging branch, they are merged into the main branch.
+- Deployment Trigger: Pushing to the main branch automatically triggers a GitHub Action that deploys the latest version of the application to the production environment on Azure.
+- No further manual steps are required for production deployment, ensuring a streamlined process.
 
 Summary:
 
-   - Staging Environment: Used for manual testing.
-   - Production Deployment: Automatically triggered upon merging to main.
-   - Deployment Platform: Azure is used for hosting the live version of the application.
+- Staging Environment: Used for manual testing.
+- Production Deployment: Automatically triggered upon merging to main.
+- Deployment Platform: Azure is used for hosting the live version of the application.
 
 ## Team Workflow
 
@@ -89,9 +91,9 @@ Summary:
 ## Definition of Done
 
 ### Our Definition of "Done":
+
 - Each story must be deployed to production & demo-able by **10:59pm on the Sunday at the end of each sprint**.
 - "Done" stories should ensure existing logic is still working correctly.
-
 
 ## Team Members
 
@@ -103,11 +105,10 @@ Summary:
 - **Email**: matthewrbilinski@lewisu.edu
 - **Github**: Mattbil2003
 
-
 - **Name**: Ivan Sanchez
 - **Email**: ivansanchez@lewisu.edu
 - **Github**: isanchez-lewisu
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE)..
