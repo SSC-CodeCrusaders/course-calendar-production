@@ -8,6 +8,7 @@ function Auth() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Handles sign-up logic, sets loading state, and provides feedback via toast notifications
   const handleSignUp = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signUp({ email, password });
@@ -17,9 +18,10 @@ function Auth() {
     } else {
       toast.success('Sign-up successful, please check your email for verification.');
     }
-    setLoading(false);
+    setLoading(false); 
   };
 
+  // Handles login logic, sets loading state, and provides feedback via toast notifications
   const handleLogin = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -27,15 +29,17 @@ function Auth() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success('Login successful!');
+      toast.success('Login successful!'); 
     }
-    setLoading(false);
+    setLoading(false); 
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
         <h1 className="text-xl font-semibold mb-6">Log In / Sign Up</h1>
+        
+        {/* Email Input Field */}
         <input
           className="w-full p-2 mb-3 border rounded focus:outline-none focus:border-blue-500"
           type="email"
@@ -43,6 +47,8 @@ function Auth() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+
+        {/* Password Input Field with Toggle Button */}
         <div className="relative w-full mb-3">
           <input
             className="w-full p-2 border rounded focus:outline-none focus:border-blue-500"
@@ -59,6 +65,8 @@ function Auth() {
             {showPassword ? 'Hide' : 'Show'}
           </button>
         </div>
+
+        {/* Log In Button */}
         <button
           onClick={handleLogin}
           disabled={loading}
@@ -66,6 +74,8 @@ function Auth() {
         >
           {loading ? 'Logging In...' : 'Log In'}
         </button>
+
+        {/* Sign Up Button */}
         <button
           onClick={handleSignUp}
           disabled={loading}

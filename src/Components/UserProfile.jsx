@@ -5,17 +5,18 @@ import { FiUser, FiMail, FiKey, FiEdit2 } from 'react-icons/fi';
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
+
   const [email, setEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   useEffect(() => {
-    // Fetch user info on mount
     const getUserProfile = async () => {
       const { data, error } = await supabase.auth.getSession();
 
@@ -27,13 +28,14 @@ const UserProfile = () => {
       if (data.session) {
         const user = data.session.user;
         setUser(user);
-        setEmail(user.email); // Set email to the user's current email
+        setEmail(user.email);
       }
     };
 
     getUserProfile();
   }, []);
 
+  // Handle email update
   const handleUpdateEmail = async () => {
     if (newEmail === email) {
       toast.error('The new email cannot be the same as the current email');
@@ -43,7 +45,7 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Update email
+      // Update user email using Supabase
       const { error: emailError } = await supabase.auth.update({
         email: newEmail,
       });
@@ -52,6 +54,7 @@ const UserProfile = () => {
         return;
       }
 
+      // Update email state and close form on success
       setEmail(newEmail);
       setShowEmailForm(false);
       toast.success('Email updated successfully');
@@ -62,6 +65,7 @@ const UserProfile = () => {
     }
   };
 
+  // Handle password change
   const handleChangePassword = async () => {
     if (newPassword !== confirmNewPassword) {
       toast.error('New passwords do not match');
@@ -76,7 +80,7 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Re-authenticate the user with the current password
+      // Re-authenticate user with the current password
       const { error: signInError } = await supabase.auth.signIn({
         email,
         password: currentPassword,
@@ -88,7 +92,7 @@ const UserProfile = () => {
         return;
       }
 
-      // Update password
+      // Update user password using Supabase
       const { error: passwordError } = await supabase.auth.update({
         password: newPassword,
       });
@@ -111,6 +115,7 @@ const UserProfile = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
         <div className="bg-white shadow-md rounded-lg w-full max-w-lg p-6">
           <div className="flex items-center mb-6">
+            {/* User profile icon */}
             <div className="bg-lewisRed text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold">
               <FiUser />
             </div>
@@ -130,6 +135,7 @@ const UserProfile = () => {
                   <p className="text-lg">{email ? email : <span className="text-gray-400">Loading...</span>}</p>
                 </div>
               </div>
+              {/* Toggle email update form */}
               <button
                 onClick={() => setShowEmailForm(!showEmailForm)}
                 className="flex items-center text-blue-500 hover:underline"
@@ -138,6 +144,7 @@ const UserProfile = () => {
               </button>
             </div>
 
+            {/* Form to update email */}
             {showEmailForm && (
               <div className="mt-4">
                 <input
@@ -168,8 +175,10 @@ const UserProfile = () => {
               Update Password
             </button>
 
+            {/* Form to update password */}
             {showPasswordForm && (
               <div className="mt-4 space-y-4">
+                {/* Current Password Input */}
                 <div className="flex items-center">
                   <FiKey className="text-gray-500 mr-3" />
                   <div className="w-full">
@@ -183,6 +192,7 @@ const UserProfile = () => {
                   </div>
                 </div>
 
+                {/* New Password Input */}
                 <div className="flex items-center">
                   <FiKey className="text-gray-500 mr-3" />
                   <div className="w-full">
@@ -196,6 +206,7 @@ const UserProfile = () => {
                   </div>
                 </div>
 
+                {/* Confirm New Password Input */}
                 <div className="flex items-center">
                   <FiKey className="text-gray-500 mr-3" />
                   <div className="w-full">
@@ -209,6 +220,7 @@ const UserProfile = () => {
                   </div>
                 </div>
 
+                {/* Update Password Button */}
                 <button
                   onClick={handleChangePassword}
                   disabled={loading}
