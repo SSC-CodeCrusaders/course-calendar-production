@@ -1,5 +1,3 @@
-// src/Components/UserInputForm.jsx
-
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -9,28 +7,30 @@ import { generateSchedule } from "../utils/scheduleGenerator";
 import { generateICS } from "../utils/icsGenerator";
 
 const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
-  const { control, handleSubmit, watch, setValue } = useForm({
-    defaultValues: calendars[currentIndex] || {
-      firstDay: "",
-      lastDay: "",
-      classTime: "",
-      daysOfClass: {
-        monday: false,
-        tuesday: false,
-        wednesday: false,
-        thursday: false,
-        friday: false,
-        saturday: false,
-        sunday: false,
-      },
-      instructorName: "",
-      className: "",
-      location: "",
-      academicTerm: "fall2024", // Default term
+  const defaultValues = calendars[currentIndex] || {
+    firstDay: "",
+    lastDay: "",
+    classTime: "",
+    daysOfClass: {
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false,
+      saturday: false,
+      sunday: false,
     },
+    instructorName: "",
+    className: "",
+    location: "",
+    academicTerm: "fall2024", // Default term
+  };
+
+  const { control, handleSubmit, watch, setValue } = useForm({
+    defaultValues,
   });
 
-  const [academicTerm, setAcademicTerm] = useState("fall2024");
+  const [academicTerm, setAcademicTerm] = useState(defaultValues.academicTerm);
 
   // Update academicTerm in form when state changes
   useEffect(() => {
@@ -52,14 +52,13 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
         i === currentIndex ? data : calendar
       );
       setCalendars(updatedCalendars);
-      localStorage.setItem("calendars", JSON.stringify(updatedCalendars));
       toast.success("Schedule saved successfully!");
 
       // Generate Schedule Events
       const scheduleEvents = generateSchedule(data);
 
       // Generate Holiday Events
-      const termHolidays = academicCalendar[data.academicTerm].holidays;
+      const termHolidays = academicCalendar[data.academicTerm]?.holidays || [];
       const holidayEvents = termHolidays.flatMap((holiday) => {
         if (holiday.date) {
           return [
@@ -139,6 +138,7 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
           <Controller
             name="firstDay"
             control={control}
+            rules={{ required: true }}
             render={({ field }) => (
               <input
                 type="date"
@@ -158,6 +158,7 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
           <Controller
             name="lastDay"
             control={control}
+            rules={{ required: true }}
             render={({ field }) => (
               <input
                 type="date"
@@ -177,6 +178,7 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
           <Controller
             name="classTime"
             control={control}
+            rules={{ required: true }}
             render={({ field }) => (
               <input
                 type="time"
@@ -191,8 +193,8 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
         {/* Days of Class */}
         <h2 className="text-center mb-4">Course Days:</h2>
         <div className="mb-4 flex-wrap flex justify-center items-center">
-          {Object.keys(watch("daysOfClass")).map((day, index) => (
-            <div key={index} className="mr-4 flex items-center">
+          {Object.keys(watch("daysOfClass")).map((day) => (
+            <div key={day} className="mr-4 flex items-center">
               <label htmlFor={day} className="mr-2">
                 {day.charAt(0).toUpperCase() + day.slice(1)}
               </label>
@@ -219,6 +221,7 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
           <Controller
             name="instructorName"
             control={control}
+            rules={{ required: true }}
             render={({ field }) => (
               <input
                 type="text"
@@ -238,6 +241,7 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
           <Controller
             name="className"
             control={control}
+            rules={{ required: true }}
             render={({ field }) => (
               <input
                 type="text"
@@ -257,6 +261,7 @@ const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
           <Controller
             name="location"
             control={control}
+            rules={{ required: true }}
             render={({ field }) => (
               <input
                 type="text"
