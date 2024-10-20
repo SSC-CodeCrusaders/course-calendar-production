@@ -1,145 +1,289 @@
-import React from "react";
+// src/Components/UserInputForm.jsx
+
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
+import PropTypes from "prop-types";
+import { academicCalendar } from "../utils/academicCalendar";
+import { generateSchedule } from "../utils/scheduleGenerator";
+import { generateICS } from "../utils/icsGenerator";
 
 const UserInputForm = ({ currentIndex, calendars = [], setCalendars }) => {
-  const currentCalendar = calendars[currentIndex] || {
-    firstDay: '',
-    lastDay: '',
-    classTime: '',
-    daysOfClass: {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false,
-    },
-    instructorName: '',
-    className: '',
-    location: '',
-  };
-
-  // Update the current calendar in the calendars array
-  const updateCurrentCalendar = (updatedCalendar) => {
-    const updatedCalendars = calendars.map((calendar, i) =>
-      i === currentIndex ? updatedCalendar : calendar
-    );
-    setCalendars(updatedCalendars);
-    localStorage.setItem('calendars', JSON.stringify(updatedCalendars));
-  };
-
-  // Handler to toggle day checkboxes
-  const handleDayChange = (day) => {
-    updateCurrentCalendar({
-      ...currentCalendar,
+  const { control, handleSubmit, watch, setValue } = useForm({
+    defaultValues: calendars[currentIndex] || {
+      firstDay: "",
+      lastDay: "",
+      classTime: "",
       daysOfClass: {
-        ...currentCalendar.daysOfClass,
-        [day]: !currentCalendar.daysOfClass[day],
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+        saturday: false,
+        sunday: false,
       },
-    });
+      instructorName: "",
+      className: "",
+      location: "",
+      academicTerm: "fall2024", // Default term
+    },
+  });
+
+  const [academicTerm, setAcademicTerm] = useState("fall2024");
+
+  // Update academicTerm in form when state changes
+  useEffect(() => {
+    setValue("academicTerm", academicTerm);
+  }, [academicTerm, setValue]);
+
+  const onSubmit = (data) => {
+    try {
+      // Validate that firstDay is before lastDay
+      const startDate = new Date(data.firstDay);
+      const endDate = new Date(data.lastDay);
+      if (startDate > endDate) {
+        toast.error("Start date must be before end date.");
+        return;
+      }
+
+      // Update calendars state
+      const updatedCalendars = calendars.map((calendar, i) =>
+        i === currentIndex ? data : calendar
+      );
+      setCalendars(updatedCalendars);
+      localStorage.setItem("calendars", JSON.stringify(updatedCalendars));
+      toast.success("Schedule saved successfully!");
+
+      // Generate Schedule Events
+      const scheduleEvents = generateSchedule(data);
+
+      // Generate Holiday Events
+      const termHolidays = academicCalendar[data.academicTerm].holidays;
+      const holidayEvents = termHolidays.flatMap((holiday) => {
+        if (holiday.date) {
+          return [
+            {
+              name: holiday.name,
+              date: new Date(holiday.date),
+            },
+          ];
+        }
+        if (holiday.start && holiday.end) {
+          const start = new Date(holiday.start);
+          const end = new Date(holiday.end);
+          const dates = [];
+          let current = new Date(start);
+          while (current <= end) {
+            dates.push({
+              name: holiday.name,
+              date: new Date(current),
+            });
+            current.setDate(current.getDate() + 1);
+          }
+          return dates;
+        }
+        return [];
+      });
+
+      // Generate ICS File
+      generateICS(scheduleEvents, holidayEvents, data.className);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save schedule.");
+    }
   };
 
   return (
     <div className="bg-lewisRed min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-white text-3xl font-bold mb-8 text-center">Class Schedule Creator</h1>
+      <h1 className="text-white text-3xl font-bold mb-8 text-center">
+        Class Schedule Creator
+      </h1>
 
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl text-center">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl text-center"
+      >
+        {/* Academic Term Selection */}
         <div className="mb-4 w-full flex justify-center items-center">
-          <label htmlFor="calendar" className="mr-4">Start of Course Date: </label>
-          <input
-            type="date"
-            value={currentCalendar.firstDay}
-            onChange={(e) =>
-              updateCurrentCalendar({
-                ...currentCalendar,
-                firstDay: e.target.value,
-              })
-            }
-            className="p-2 border rounded text-center"
+          <label htmlFor="academicTerm" className="mr-4">
+            Academic Term:{" "}
+          </label>
+          <Controller
+            name="academicTerm"
+            control={control}
+            render={({ field }) => (
+              <select
+                {...field}
+                onChange={(e) => {
+                  setAcademicTerm(e.target.value);
+                  field.onChange(e);
+                }}
+                className="p-2 border rounded text-center"
+              >
+                {Object.keys(academicCalendar).map((term) => (
+                  <option key={term} value={term}>
+                    {term.charAt(0).toUpperCase() + term.slice(1)}
+                  </option>
+                ))}
+              </select>
+            )}
           />
         </div>
+
+        {/* Start Date */}
         <div className="mb-4 w-full flex justify-center items-center">
-          <label htmlFor="calendar" className="mr-4">End of Course Date:</label>
-          <input
-            type="date"
-            value={currentCalendar.lastDay}
-            onChange={(e) =>
-              updateCurrentCalendar({
-                ...currentCalendar,
-                lastDay: e.target.value,
-              })
-            }
-            className="p-2 border rounded text-center"
+          <label htmlFor="firstDay" className="mr-4">
+            Start of Course Date:{" "}
+          </label>
+          <Controller
+            name="firstDay"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="date"
+                {...field}
+                className="p-2 border rounded text-center"
+                required
+              />
+            )}
           />
         </div>
-        <h2 className="text-center mb-4">Course Dates:</h2>
+
+        {/* End Date */}
+        <div className="mb-4 w-full flex justify-center items-center">
+          <label htmlFor="lastDay" className="mr-4">
+            End of Course Date:
+          </label>
+          <Controller
+            name="lastDay"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="date"
+                {...field}
+                className="p-2 border rounded text-center"
+                required
+              />
+            )}
+          />
+        </div>
+
+        {/* Class Time */}
+        <div className="mb-4 w-full flex justify-center items-center">
+          <label htmlFor="classTime" className="mr-4">
+            Class Time (24h format):
+          </label>
+          <Controller
+            name="classTime"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="time"
+                {...field}
+                className="p-2 border rounded text-center"
+                required
+              />
+            )}
+          />
+        </div>
+
+        {/* Days of Class */}
+        <h2 className="text-center mb-4">Course Days:</h2>
         <div className="mb-4 flex-wrap flex justify-center items-center">
-          {Object.keys(currentCalendar.daysOfClass).map((day, index) => (
+          {Object.keys(watch("daysOfClass")).map((day, index) => (
             <div key={index} className="mr-4 flex items-center">
               <label htmlFor={day} className="mr-2">
                 {day.charAt(0).toUpperCase() + day.slice(1)}
               </label>
-              <input
-                type="checkbox"
-                id={day}
-                checked={currentCalendar.daysOfClass[day]}
-                onChange={() => handleDayChange(day)}
-                className="form-checkbox"
+              <Controller
+                name={`daysOfClass.${day}`}
+                control={control}
+                render={({ field }) => (
+                  <input
+                    type="checkbox"
+                    {...field}
+                    className="form-checkbox"
+                  />
+                )}
               />
             </div>
           ))}
         </div>
 
-        <br />
+        {/* Instructor Name */}
         <div className="mb-4 w-full flex justify-center items-center">
-          <label htmlFor="instructor_name" className="mr-4">Instructor Name: </label>
-          <input
-            type="text"
-            value={currentCalendar.instructorName}
-            onChange={(e) =>
-              updateCurrentCalendar({
-                ...currentCalendar,
-                instructorName: e.target.value,
-              })
-            }
-            className="p-2 border rounded text-center"
+          <label htmlFor="instructorName" className="mr-4">
+            Instructor Name:{" "}
+          </label>
+          <Controller
+            name="instructorName"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="text"
+                {...field}
+                className="p-2 border rounded text-center"
+                required
+              />
+            )}
           />
         </div>
 
-        <br />
+        {/* Course Name */}
         <div className="mb-4 w-full flex justify-center items-center">
-          <label htmlFor="class_name" className="mr-4">Course Name: </label>
-          <input
-            type="text"
-            value={currentCalendar.className}
-            onChange={(e) =>
-              updateCurrentCalendar({
-                ...currentCalendar,
-                className: e.target.value,
-              })
-            }
-            className="p-2 border rounded text-center"
+          <label htmlFor="className" className="mr-4">
+            Course Name:{" "}
+          </label>
+          <Controller
+            name="className"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="text"
+                {...field}
+                className="p-2 border rounded text-center"
+                required
+              />
+            )}
           />
         </div>
 
-        <br />
+        {/* Location */}
         <div className="mb-4 w-full flex justify-center items-center">
-          <label htmlFor="location" className="mr-4">Course Location: </label>
-          <input
-            type="text"
-            value={currentCalendar.location}
-            onChange={(e) =>
-              updateCurrentCalendar({
-                ...currentCalendar,
-                location: e.target.value,
-              })
-            }
-            className="p-2 border rounded text-center"
+          <label htmlFor="location" className="mr-4">
+            Course Location:{" "}
+          </label>
+          <Controller
+            name="location"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="text"
+                {...field}
+                className="p-2 border rounded text-center"
+                required
+              />
+            )}
           />
         </div>
-      </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="mt-4 bg-lewisRed text-white px-4 py-2 rounded"
+        >
+          Save Schedule & Generate ICS
+        </button>
+      </form>
     </div>
   );
+};
+
+UserInputForm.propTypes = {
+  currentIndex: PropTypes.number.isRequired,
+  calendars: PropTypes.array.isRequired,
+  setCalendars: PropTypes.func.isRequired,
 };
 
 export default UserInputForm;
