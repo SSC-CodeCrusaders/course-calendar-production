@@ -1,6 +1,8 @@
+// src/Components/Header.jsx
 import { Link } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const Header = ({ user, setUser }) => {
   useEffect(() => {
@@ -73,6 +75,11 @@ const Header = ({ user, setUser }) => {
       </div>
     </nav>
   );
+};
+
+Header.propTypes = {
+  user: PropTypes.object,
+  setUser: PropTypes.func.isRequired,
 };
 
 export default Header;
