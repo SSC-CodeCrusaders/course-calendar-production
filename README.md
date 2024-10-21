@@ -30,7 +30,7 @@ To set up the project locally, follow these steps:
    ```
 3. Install dependencies:
    ```bash
-   [Command to install dependencies, not yet implemented]
+   npm install
    ```
 
 ## Usage
@@ -38,7 +38,7 @@ To set up the project locally, follow these steps:
 Run the following command to start the project locally:
 
 ```bash
-[Command to start the project, not yet implemented]
+npm run dev
 ```
 
 ## Contributing
