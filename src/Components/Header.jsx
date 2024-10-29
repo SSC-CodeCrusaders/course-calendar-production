@@ -1,28 +1,19 @@
 import { Link } from "react-router-dom";
+import { useUser } from '../contexts/UserContext';
 import { supabase } from '../utils/supabaseClient';
-import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
-const Header = ({ user, setUser }) => {
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user ?? null);
-    };
-
-    getSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, [setUser]);
+const Header = () => {
+  const { user, setUser } = useUser();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null); // Update user state to null on sign-out
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error('Error signing out: ' + error.message);
+    } else {
+      toast.success('Signed out successfully');
+      setUser(null);
+    }
   };
 
   return (
