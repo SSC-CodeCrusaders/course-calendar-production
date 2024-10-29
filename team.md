@@ -16,6 +16,10 @@ Welcome to the **Code Crusaders**! We are a passionate and skilled group of deve
   - **Email**: [ivansanchez@lewisu.edu](mailto:ivansanchez@lewisu.edu)
   - **Role**: Developer
 
+- **Jason Yescas**
+  - **Email**: [jasonyescas@lewisu.edu](mailto:jasonyescas@lewisu.edu)
+  - **Role**: Developer
+
 ## Our Vision
 
 Our goal as the Code Crusaders is to deliver a high-quality software solution for our Aviation Students. We will be connecting the Flight Simulator with the Flight Management Simulator!
