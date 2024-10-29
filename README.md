@@ -113,6 +113,11 @@ Summary:
 - **Email**: matthewdshouse@lewisu.edu
 - **Github**: mshouse8624
 
+- **Name**: Jason Yescas
+- **Email**: jasonyescas@lewisu.edu
+- **Github**: jayes5089
+
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE)..

@@ -16,8 +16,12 @@ Welcome to the **Code Crusaders**! We are a passionate and skilled group of deve
   - **Email**: [ivansanchez@lewisu.edu](mailto:ivansanchez@lewisu.edu)
   - **Role**: Developer
 
-  - **Matthew Shouse**
+- **Matthew Shouse**
   - **Email**: [matthewdshouse@lewisu.edu](mailto:matthewdshouse@lewisu.edu)
+  - **Role**: Developer
+
+- **Jason Yescas**
+  - **Email**: [jasonyescas@lewisu.edu](mailto:jasonyescas@lewisu.edu)
   - **Role**: Developer
 
 ## Our Vision
