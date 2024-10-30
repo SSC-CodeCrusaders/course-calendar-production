@@ -117,6 +117,10 @@ Summary:
 - **Email**: jasonyescas@lewisu.edu
 - **Github**: jayes5089
 
+- **Name**: Nikhila Gonuguntla
+- **Email**: nikhilagonuguntla@lewisu.edu
+- **Github**: nikiGN-07
+
 
 ## License
 
