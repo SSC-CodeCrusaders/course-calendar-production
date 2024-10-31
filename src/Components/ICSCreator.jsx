@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
-import useCalendar from '../hooks/useCalendar';
+// import useCalendar from '../hooks/useCalendar'; // Removed as per user instructions
 import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 import CalendarEditor from './CalendarEditor';
@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 
 const ICSCcreator = () => {
   const { state, dispatch } = useUser();
-  const { fetchCalendarById } = useCalendar();
+  // const { fetchCalendarById } = useCalendar(); // Removed as per user instructions
   const [calendarData, setCalendarData] = useState(null);
   const [loadingCalendar, setLoadingCalendar] = useState(false);
 
@@ -23,6 +23,7 @@ const ICSCcreator = () => {
       }
 
       const selectedCalendar = state.calendars[state.current_index];
+
       if (!selectedCalendar) {
         setCalendarData(null);
         return;
@@ -31,13 +32,8 @@ const ICSCcreator = () => {
       setLoadingCalendar(true);
 
       if (state.user && selectedCalendar.id) {
-        // Logged-in User: Fetch from Supabase if not cached
-        const calendar = await fetchCalendarById(selectedCalendar.id);
-        if (calendar) {
-          setCalendarData(calendar);
-        } else {
-          setCalendarData(null);
-        }
+        // Logged-in User: Use selectedCalendar directly
+        setCalendarData(selectedCalendar);
       } else {
         // Guest User: Use local data
         setCalendarData(selectedCalendar);
@@ -47,7 +43,7 @@ const ICSCcreator = () => {
     };
 
     loadCalendar();
-  }, [state.current_index, state.calendars, state.user, fetchCalendarById]);
+  }, [state.current_index, state.calendars, state.user]);
 
   // Handle Save Action (for editing existing calendars)
   const handleSave = async (updatedCalendar) => {
@@ -69,12 +65,13 @@ const ICSCcreator = () => {
 
         // Update cache
         dispatch({
-          type: 'CACHE_CALENDAR',
+          type: ACTIONS.CACHE_CALENDAR,
           payload: { id: updatedCalendar.id, data: updatedCalendar },
         });
 
         toast.success('Calendar saved successfully!');
       } catch (error) {
+        console.error('Error saving calendar:', error);
         toast.error('Error saving calendar: ' + error.message);
       }
     } else {

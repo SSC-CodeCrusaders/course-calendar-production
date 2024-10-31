@@ -49,6 +49,7 @@ const reducer = (state, action) => {
         calendarCache: { ...state.calendarCache, [action.payload.id]: action.payload.data },
       };
     default:
+      console.warn('Unhandled action type:', action.type);
       return state;
   }
 };
@@ -66,6 +67,7 @@ export const UserProvider = ({ children }) => {
       const { data, error } = await supabase.auth.getSession();
       if (error) {
         toast.error('Failed to get user session');
+        console.error('Error fetching session:', error);
       }
       dispatch({ type: ACTIONS.SET_USER, payload: data.session?.user ?? null });
       dispatch({ type: ACTIONS.SET_LOADING, payload: false });
@@ -79,7 +81,11 @@ export const UserProvider = ({ children }) => {
 
     // Cleanup
     return () => {
-      authListener.subscription.unsubscribe();
+      if (authListener?.subscription) {
+        authListener.subscription.unsubscribe();
+      } else {
+        console.warn('No subscription found to unsubscribe.');
+      }
     };
   }, []);
 
@@ -94,9 +100,12 @@ export const UserProvider = ({ children }) => {
             .select('*')
             .eq('user_id', state.user.id);
 
-          if (error) throw error;
+          if (error) {
+            throw error;
+          }
 
           dispatch({ type: ACTIONS.SET_CALENDARS, payload: data });
+
           // Optionally cache calendars
           data.forEach(calendar => {
             dispatch({ type: ACTIONS.CACHE_CALENDAR, payload: { id: calendar.id, data: calendar } });
@@ -107,6 +116,7 @@ export const UserProvider = ({ children }) => {
             dispatch({ type: ACTIONS.SET_CURRENT_INDEX, payload: 0 });
           }
         } catch (error) {
+          console.error('Error fetching calendars:', error);
           toast.error('Error fetching calendars: ' + error.message);
         }
       } else {

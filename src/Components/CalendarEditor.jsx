@@ -6,8 +6,6 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 
 const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
-  console.log('Calendar prop:', calendar); // Debugging
-
   // Destructure with default values to prevent undefined errors
   const {
     first_day = '',
@@ -67,7 +65,7 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
     location: Yup.string().required('Course Location is required'),
   });
 
-  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     const updatedCalendar = {
       ...calendar,
       ...values,
@@ -78,6 +76,7 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
       toast.success('Calendar updated successfully!');
       setSubmitting(false);
     } catch (error) {
+      console.error('Error updating calendar:', error);
       toast.error('Error updating calendar: ' + error.message);
       setSubmitting(false);
     }
@@ -85,12 +84,19 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
 
   return (
     <div className="mt-4">
-      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
         {({ isSubmitting }) => (
           <Form className="space-y-4">
             {/* Start of Course Date */}
             <div className="flex items-center">
-              <label htmlFor="first_day" className="block text-sm font-semibold mb-1 w-1/3">Start of Course Date</label>
+              <label htmlFor="first_day" className="block text-sm font-semibold mb-1 w-1/3">
+                Start of Course Date
+              </label>
               <Field
                 type="date"
                 name="first_day"
@@ -102,7 +108,9 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
 
             {/* End of Course Date */}
             <div className="flex items-center">
-              <label htmlFor="last_day" className="block text-sm font-semibold mb-1 w-1/3">End of Course Date</label>
+              <label htmlFor="last_day" className="block text-sm font-semibold mb-1 w-1/3">
+                End of Course Date
+              </label>
               <Field
                 type="date"
                 name="last_day"
@@ -114,7 +122,9 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
 
             {/* Start Time */}
             <div className="flex items-center">
-              <label htmlFor="start_time" className="block text-sm font-semibold mb-1 w-1/3">Start Time</label>
+              <label htmlFor="start_time" className="block text-sm font-semibold mb-1 w-1/3">
+                Start Time
+              </label>
               <Field
                 type="time"
                 name="start_time"
@@ -126,7 +136,9 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
 
             {/* End Time */}
             <div className="flex items-center">
-              <label htmlFor="end_time" className="block text-sm font-semibold mb-1 w-1/3">End Time</label>
+              <label htmlFor="end_time" className="block text-sm font-semibold mb-1 w-1/3">
+                End Time
+              </label>
               <Field
                 type="time"
                 name="end_time"
@@ -142,8 +154,15 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
               <div className="w-full p-3 border rounded focus:outline-none focus:border-lewisRed">
                 {Object.keys(days_of_class).map((day) => (
                   <div key={day} className="flex items-center mb-2">
-                    <Field type="checkbox" name={`days_of_class.${day}`} id={day} className="form-checkbox h-5 w-5 text-lewisRed" />
-                    <label htmlFor={day} className="ml-2 capitalize">{day}</label>
+                    <Field
+                      type="checkbox"
+                      name={`days_of_class.${day}`}
+                      id={day}
+                      className="form-checkbox h-5 w-5 text-lewisRed"
+                    />
+                    <label htmlFor={day} className="ml-2 capitalize">
+                      {day}
+                    </label>
                   </div>
                 ))}
               </div>
@@ -152,7 +171,9 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
 
             {/* Instructor Name */}
             <div className="flex items-center">
-              <label htmlFor="instructor_name" className="block text-sm font-semibold mb-1 w-1/3">Instructor Name</label>
+              <label htmlFor="instructor_name" className="block text-sm font-semibold mb-1 w-1/3">
+                Instructor Name
+              </label>
               <Field
                 type="text"
                 name="instructor_name"
@@ -165,7 +186,9 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
 
             {/* Course Name */}
             <div className="flex items-center">
-              <label htmlFor="class_name" className="block text-sm font-semibold mb-1 w-1/3">Course Name</label>
+              <label htmlFor="class_name" className="block text-sm font-semibold mb-1 w-1/3">
+                Course Name
+              </label>
               <Field
                 type="text"
                 name="class_name"
@@ -178,7 +201,9 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
 
             {/* Course Location */}
             <div className="flex items-center">
-              <label htmlFor="location" className="block text-sm font-semibold mb-1 w-1/3">Course Location</label>
+              <label htmlFor="location" className="block text-sm font-semibold mb-1 w-1/3">
+                Course Location
+              </label>
               <Field
                 type="text"
                 name="location"

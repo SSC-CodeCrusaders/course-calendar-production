@@ -2,18 +2,10 @@
 
 import { useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { useUser } from '../contexts/UserContext';
 import { toast } from 'react-toastify';
 
 const useCalendar = () => {
-  const { state, dispatch } = useUser();
-
   const fetchCalendarById = useCallback(async (id) => {
-    // Check if calendar is cached
-    if (state.calendarCache[id]) {
-      return state.calendarCache[id];
-    }
-
     try {
       const { data, error } = await supabase
         .from('calendars')
@@ -21,17 +13,18 @@ const useCalendar = () => {
         .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      // Cache the calendar
-      dispatch({ type: 'CACHE_CALENDAR', payload: { id, data } });
-
+      console.log('Fetched Calendar by ID:', data);
       return data;
     } catch (error) {
+      console.error('Error fetching calendar by ID:', error);
       toast.error('Error fetching calendar: ' + error.message);
       return null;
     }
-  }, [state.calendarCache, dispatch]);
+  }, []);
 
   return { fetchCalendarById };
 };
