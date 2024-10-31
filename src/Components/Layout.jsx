@@ -1,6 +1,5 @@
 // src/Components/Layout.jsx
 
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -24,17 +23,17 @@ const Layout = () => {
       </div>
 
       {/* Toast Notifications */}
-      <ToastContainer 
-        position="top-right" 
-        autoClose={2000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
-        pauseOnHover 
-        theme="light" 
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
         icon={false}
       />
     </div>

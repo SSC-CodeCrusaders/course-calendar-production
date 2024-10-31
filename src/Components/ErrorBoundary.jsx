@@ -1,35 +1,44 @@
+// src/Components/ErrorBoundary.jsx
+
 import React from 'react';
 import PropTypes from 'prop-types';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorInfo: null };
   }
 
   static getDerivedStateFromError(error) {
-    // Update state so next render shows fallback UI
+    // Update state to display fallback UI
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    // You can log the error to an error reporting service here
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+    this.setState({ errorInfo });
   }
 
   render() {
     if (this.state.hasError) {
       // Fallback UI
       return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-          <div className="bg-white p-6 rounded shadow-md">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+          <div className="bg-white p-8 rounded shadow-md text-center">
             <h1 className="text-2xl font-bold mb-4">Something went wrong.</h1>
-            <p className="text-gray-700">Please try refreshing the page or contact support if the problem persists.</p>
+            <p className="mb-4">Please try refreshing the page or contact support if the problem persists.</p>
+            {this.state.errorInfo && (
+              <details className="whitespace-pre-wrap text-left">
+                {this.state.errorInfo.componentStack}
+              </details>
+            )}
           </div>
         </div>
       );
     }
 
-    return this.props.children; 
+    return this.props.children;
   }
 }
 

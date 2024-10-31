@@ -1,28 +1,34 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+// src/Components/CalendarList.jsx
 
-const CalendarList = ({ calendars, currentIndex, selectCalendar }) => {
+import PropTypes from 'prop-types';
+import { useUser } from '../contexts/UserContext';
+
+const CalendarList = () => {
+  const { state, dispatch } = useUser();
+
+  const handleSelectCalendar = (index) => {
+    dispatch({ type: 'SET_CURRENT_INDEX', payload: index });
+  };
+
   return (
-    <ul>
-      {calendars.map((calendar, index) => (
-        <li
-          key={index}
-          onClick={() => selectCalendar(index)}
-          className={`cursor-pointer p-2 mb-2 rounded ${
-            index === currentIndex ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300'
-          } hover:bg-blue-400 hover:text-white transition-colors duration-200`}
-        >
-          {calendar.className || `Calendar ${index + 1}`}
-        </li>
-      ))}
-    </ul>
+    <div className="overflow-y-auto">
+      <ul>
+        {state.calendars.map((calendar, index) => (
+          <li
+            key={calendar.id || index}
+            className={`p-4 cursor-pointer ${
+              state.current_index === index ? 'bg-lewisRed text-white' : 'hover:bg-gray-200'
+            }`}
+            onClick={() => handleSelectCalendar(index)}
+          >
+            {calendar.class_name || `Calendar ${index + 1}`}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
-CalendarList.propTypes = {
-  calendars: PropTypes.arrayOf(PropTypes.object).isRequired,
-  currentIndex: PropTypes.number.isRequired,
-  selectCalendar: PropTypes.func.isRequired,
-};
+CalendarList.propTypes = {};
 
 export default CalendarList;

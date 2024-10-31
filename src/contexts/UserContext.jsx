@@ -1,117 +1,141 @@
 // src/contexts/UserContext.jsx
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../utils/supabaseClient';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 
-// Create a Context for the user and calendar
-const UserContext = createContext();
-
-// Custom hook to use the UserContext
-export const useUser = () => useContext(UserContext);
-
-// Define the default calendar structure
-const defaultCalendar = {
-  firstDay: '',
-  lastDay: '',
-  startTime: '',
-  endTime: '',
-  daysOfClass: {
-    monday: false,
-    tuesday: false,
-    wednesday: false,
-    thursday: false,
-    friday: false,
-    saturday: false,
-    sunday: false,
-  },
-  instructorName: '',
-  className: '',
-  location: '',
+// Initial State
+const initialState = {
+  user: null,
+  loading: true,
+  calendars: [],
+  current_index: null,
+  calendarCache: {},
 };
 
-// Provider component to wrap around parts of the app that need access to user and calendar state
+// Actions
+const ACTIONS = {
+  SET_USER: 'SET_USER',
+  SET_LOADING: 'SET_LOADING',
+  SET_CALENDARS: 'SET_CALENDARS',
+  ADD_CALENDAR: 'ADD_CALENDAR',
+  UPDATE_CALENDAR: 'UPDATE_CALENDAR',
+  SET_CURRENT_INDEX: 'SET_CURRENT_INDEX',
+  CACHE_CALENDAR: 'CACHE_CALENDAR',
+};
+
+// Reducer
+const reducer = (state, action) => {
+  switch (action.type) {
+    case ACTIONS.SET_USER:
+      return { ...state, user: action.payload };
+    case ACTIONS.SET_LOADING:
+      return { ...state, loading: action.payload };
+    case ACTIONS.SET_CALENDARS:
+      return { ...state, calendars: action.payload };
+    case ACTIONS.ADD_CALENDAR:
+      return { ...state, calendars: [...state.calendars, action.payload] };
+    case ACTIONS.UPDATE_CALENDAR:
+      const updatedCalendars = state.calendars.map((cal, idx) =>
+        idx === action.payload.index ? action.payload.calendar : cal
+      );
+      return { ...state, calendars: updatedCalendars };
+    case ACTIONS.SET_CURRENT_INDEX:
+      return { ...state, current_index: action.payload };
+    case ACTIONS.CACHE_CALENDAR:
+      return {
+        ...state,
+        calendarCache: { ...state.calendarCache, [action.payload.id]: action.payload.data },
+      };
+    default:
+      return state;
+  }
+};
+
+// Context
+const UserContext = createContext();
+
+// Provider
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Calendar states
-  const [calendars, setCalendars] = useState(() => {
-    const storedCalendars = localStorage.getItem('calendars');
-    if (storedCalendars) {
-      const parsed = JSON.parse(storedCalendars);
-      // Ensure each calendar has all required fields
-      return parsed.map(calendar => ({
-        firstDay: calendar.firstDay || '',
-        lastDay: calendar.lastDay || '',
-        startTime: calendar.startTime || '',
-        endTime: calendar.endTime || '',
-        daysOfClass: calendar.daysOfClass || {
-          monday: false,
-          tuesday: false,
-          wednesday: false,
-          thursday: false,
-          friday: false,
-          saturday: false,
-          sunday: false,
-        },
-        instructorName: calendar.instructorName || '',
-        className: calendar.className || '',
-        location: calendar.location || '',
-      }));
-    }
-    return [defaultCalendar];
-  });
-
-  const [currentIndex, setCurrentIndex] = useState(() => {
-    const storedIndex = localStorage.getItem('currentIndex');
-    return storedIndex ? JSON.parse(storedIndex) : 0;
-  });
-
-  // Fetch the current session
-  const fetchUser = async () => {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      toast.error('Failed to get user session');
-    }
-    setUser(data.session?.user ?? null);
-    setLoading(false);
-  };
-
+  // Fetch user session on mount
   useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        toast.error('Failed to get user session');
+      }
+      dispatch({ type: ACTIONS.SET_USER, payload: data.session?.user ?? null });
+      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+    };
+
     fetchUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      dispatch({ type: ACTIONS.SET_USER, payload: session?.user ?? null });
     });
 
-    // Cleanup the listener on unmount
+    // Cleanup
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
 
-  // Persist calendars to localStorage whenever they change
+  // Load Calendars based on user state
   useEffect(() => {
-    localStorage.setItem('calendars', JSON.stringify(calendars));
-  }, [calendars]);
+    const loadCalendars = async () => {
+      if (state.user) {
+        // Logged-in User: Fetch from Supabase
+        try {
+          const { data, error } = await supabase
+            .from('calendars')
+            .select('*')
+            .eq('user_id', state.user.id);
 
-  // Persist currentIndex to localStorage whenever it changes
+          if (error) throw error;
+
+          dispatch({ type: ACTIONS.SET_CALENDARS, payload: data });
+          // Optionally cache calendars
+          data.forEach(calendar => {
+            dispatch({ type: ACTIONS.CACHE_CALENDAR, payload: { id: calendar.id, data: calendar } });
+          });
+
+          // If no calendar is selected, set to first calendar
+          if (data.length > 0 && state.current_index === null) {
+            dispatch({ type: ACTIONS.SET_CURRENT_INDEX, payload: 0 });
+          }
+        } catch (error) {
+          toast.error('Error fetching calendars: ' + error.message);
+        }
+      } else {
+        // Guest User: Fetch from localStorage
+        const stored_calendars = localStorage.getItem('calendars_guest');
+        if (stored_calendars) {
+          const parsed = JSON.parse(stored_calendars);
+          dispatch({ type: ACTIONS.SET_CALENDARS, payload: parsed });
+          if (parsed.length > 0 && state.current_index === null) {
+            dispatch({ type: ACTIONS.SET_CURRENT_INDEX, payload: 0 });
+          }
+        } else {
+          dispatch({ type: ACTIONS.SET_CALENDARS, payload: [] });
+        }
+      }
+    };
+
+    loadCalendars();
+  }, [state.user]);
+
+  // Persist guest calendars to localStorage
   useEffect(() => {
-    localStorage.setItem('currentIndex', JSON.stringify(currentIndex));
-  }, [currentIndex]);
+    if (!state.user) {
+      localStorage.setItem('calendars_guest', JSON.stringify(state.calendars));
+    }
+  }, [state.calendars, state.user]);
 
   return (
-    <UserContext.Provider value={{
-      user,
-      setUser,
-      loading,
-      calendars,
-      setCalendars,
-      currentIndex,
-      setCurrentIndex
-    }}>
+    <UserContext.Provider value={{ state, dispatch }}>
       {children}
     </UserContext.Provider>
   );
@@ -119,4 +143,9 @@ export const UserProvider = ({ children }) => {
 
 UserProvider.propTypes = {
   children: PropTypes.node.isRequired,
+};
+
+// Custom Hook for consuming context
+export const useUser = () => {
+  return useContext(UserContext);
 };

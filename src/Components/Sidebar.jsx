@@ -1,49 +1,24 @@
 // src/Components/Sidebar.jsx
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import CalendarList from './CalendarList';
 import { useUser } from '../contexts/UserContext';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 const Sidebar = () => {
-  const { calendars, setCalendars, currentIndex, setCurrentIndex } = useUser();
-  const defaultCalendar = {
-    firstDay: '',
-    lastDay: '',
-    startTime: '',
-    endTime: '',
-    daysOfClass: {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false,
-    },
-    instructorName: '',
-    className: '',
-    location: '',
-  };
-
+  const { state, dispatch } = useUser();
   const [isOpen, setIsOpen] = useState(true);
-  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
   const selectCalendar = (index) => {
-    setCurrentIndex(index);
-    navigate('/'); // Redirect to the main creator page when selecting a calendar
+    dispatch({ type: 'SET_CURRENT_INDEX', payload: index });
+    // No need to navigate; assuming ICS Creator is on the main page
   };
 
-  const createNewCal = () => {
-    const updatedCalendars = [...calendars, { ...defaultCalendar }];
-    setCalendars(updatedCalendars);
-    setCurrentIndex(updatedCalendars.length - 1);
-    navigate('/'); // Redirect to the main creator page when creating a new calendar
-  };
+  // Remove the createNewCal function to prevent pre-creation
 
   return (
     <>
@@ -57,18 +32,18 @@ const Sidebar = () => {
 
         {/* Calendar List */}
         <CalendarList
-          calendars={calendars}
-          currentIndex={currentIndex}
+          calendars={state.calendars}
+          currentIndex={state.current_index}
           selectCalendar={selectCalendar}
         />
 
         {/* Create Calendar Button */}
-        <button
-          className="mt-6 bg-green-600 hover:bg-green-500 text-white p-2 w-full rounded transition duration-200 ease-in-out"
-          onClick={createNewCal}
+        <Link
+          to="/create"
+          className="mt-6 bg-green-600 hover:bg-green-500 text-white p-2 w-full rounded transition duration-200 ease-in-out text-center block"
         >
           + Create Calendar
-        </button>
+        </Link>
       </div>
 
       {/* Toggle Button */}
@@ -84,5 +59,7 @@ const Sidebar = () => {
     </>
   );
 };
+
+Sidebar.propTypes = {};
 
 export default Sidebar;

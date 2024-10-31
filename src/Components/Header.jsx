@@ -1,10 +1,12 @@
+// src/Components/Header.jsx
+
 import { Link } from "react-router-dom";
 import { useUser } from '../contexts/UserContext';
 import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 
 const Header = () => {
-  const { user, setUser } = useUser();
+  const { state, dispatch } = useUser();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -12,7 +14,9 @@ const Header = () => {
       toast.error('Error signing out: ' + error.message);
     } else {
       toast.success('Signed out successfully');
-      setUser(null);
+      dispatch({ type: 'SET_USER', payload: null });
+      dispatch({ type: 'SET_CALENDARS', payload: [] });
+      dispatch({ type: 'SET_CURRENT_INDEX', payload: null });
     }
   };
 
@@ -37,15 +41,15 @@ const Header = () => {
           >
             Info
           </a>
-          {!user ? (
+          {!state.user ? (
             <Link className="hover:text-gray" to="/auth">
               Log In / Sign Up
             </Link>
           ) : (
             <>
               {/* Display user email and greeting */}
-              <span className="text-sm">Welcome, {user.email}</span>
-              
+              <span className="text-sm">Welcome, {state.user.email}</span>
+
               {/* Profile link for logged-in users */}
               <Link className="hover:text-gray ml-4" to="/profile">
                 Profile
