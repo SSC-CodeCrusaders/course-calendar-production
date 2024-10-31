@@ -35,9 +35,9 @@ const Header = ({ user, setUser }) => {
           <Link className="hover:text-gray" to="/">
             Home
           </Link>
-          <Link className="hover:text-gray" to="/download">
+          {/* <Link className="hover:text-gray" to="/download">
             Download
-          </Link>
+          </Link> */}
           <a
             className="hover:text-gray"
             href="https://salmon-island-04e296f10.5.azurestaticapps.net"
