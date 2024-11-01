@@ -2,7 +2,7 @@
 import React from 'react';
 
 const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar }) => (
-  <aside className="w-64 bg-gray p-5 text-white h-screen overflow-y-auto">
+  <aside className="w-64 bg-lewisred p-5 text-white h-screen overflow-y-auto">
     <h2 className="text-xl font-semibold mb-6">Your Calendars</h2>
     <div className="flex flex-col gap-4">
       {calendars.map((_, index) => (
