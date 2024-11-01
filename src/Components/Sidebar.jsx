@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import CalendarList from './CalendarList';
 import { useUser } from '../contexts/UserContext';
-import { navigate } from 'react-router-dom';
-import Button from './Button';
+import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
   const { state, dispatch } = useUser();
@@ -16,13 +15,6 @@ const Sidebar = () => {
 
   const selectCalendar = (index) => {
     dispatch({ type: 'SET_CURRENT_INDEX', payload: index });
-  };
-
-  const handleCreateNewCalendar = () => {
-    // Reset the selected calendar
-    dispatch({ type: 'SET_CURRENT_INDEX', payload: null });
-    // Navigate to the create calendar screen
-    navigate('/create');
   };
 
   return (
@@ -43,13 +35,12 @@ const Sidebar = () => {
         />
 
         {/* Create Calendar Button */}
-        <Button
-          type="button"
-          onClick={handleCreateNewCalendar}
+        <Link
+          to="/create"
           className="mt-6 bg-green-600 hover:bg-green-500 text-white p-2 w-full rounded transition duration-200 ease-in-out text-center block"
         >
           + Create Calendar
-        </Button>
+        </Link>
       </div>
 
       {/* Toggle Button */}
