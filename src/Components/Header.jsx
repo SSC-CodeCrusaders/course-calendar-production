@@ -1,6 +1,8 @@
+// src/Components/Header.jsx
 import { Link } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const Header = ({ user, setUser }) => {
   useEffect(() => {
@@ -35,9 +37,9 @@ const Header = ({ user, setUser }) => {
           <Link className="hover:text-gray" to="/">
             Home
           </Link>
-          {/* <Link className="hover:text-gray" to="/download">
+          <Link className="hover:text-gray" to="/download">
             Download
-          </Link> */}
+          </Link>
           <a
             className="hover:text-gray"
             href="https://salmon-island-04e296f10.5.azurestaticapps.net"
@@ -73,6 +75,11 @@ const Header = ({ user, setUser }) => {
       </div>
     </nav>
   );
+};
+
+Header.propTypes = {
+  user: PropTypes.object,
+  setUser: PropTypes.func.isRequired,
 };
 
 export default Header;
