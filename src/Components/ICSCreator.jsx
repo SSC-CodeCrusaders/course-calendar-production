@@ -1,6 +1,6 @@
 // src/Components/ICSCcreator.jsx
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';

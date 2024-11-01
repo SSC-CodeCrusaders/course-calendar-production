@@ -1,10 +1,9 @@
-import React from 'react';
-import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/solid';  // Import Hero Icons
-import { useNavigate, useLocation } from 'react-router-dom';  // Import React Router hooks
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/solid';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ProgressBar = () => {
-  const navigate = useNavigate();  // For navigation
-  const location = useLocation();  // To track the current route
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Define the steps and their corresponding routes
   const steps = ['/step1', '/step2', '/step3'];
@@ -44,7 +43,7 @@ const ProgressBar = () => {
         <button
           className="bg-transparent text-gray-600 hover:text-black p-2 rounded"
           onClick={handlePrevious}
-          disabled={currentStepIndex === 0}  // Disable when on the first step
+          disabled={currentStepIndex === 0}
         >
           <ArrowLeftIcon className="h-6 w-6" />  {/* Hero Icon for Previous */}
         </button>
@@ -53,7 +52,7 @@ const ProgressBar = () => {
         <button
           className="bg-transparent text-gray-600 hover:text-black p-2 rounded"
           onClick={handleNext}
-          disabled={currentStepIndex === steps.length - 1}  // Disable when on the last step
+          disabled={currentStepIndex === steps.length - 1}
         >
           <ArrowRightIcon className="h-6 w-6" />  {/* Hero Icon for Next */}
         </button>

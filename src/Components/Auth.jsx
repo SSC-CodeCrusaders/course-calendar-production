@@ -1,6 +1,6 @@
 // src/Components/Auth.jsx
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useUser } from '../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +23,7 @@ const Auth = () => {
     } else {
       toast.success('Successfully signed in!');
       // Redirect to home or creator page
-      navigate('/'); // You can change this to '/create' if preferred
+      navigate('/');
     }
   };
 
@@ -36,14 +36,13 @@ const Auth = () => {
       toast.error('Error signing up: ' + error.message);
     } else {
       toast.success('Signup successful! Please check your email for confirmation.');
-      // Optionally, redirect to a confirmation page or home
-      navigate('/'); // Or any other desired route
+      navigate('/'); 
     }
   };
 
   // If already authenticated, redirect to home
   if (state.user) {
-    navigate('/'); // Or any other desired route
+    navigate('/');
     return null;
   }
 

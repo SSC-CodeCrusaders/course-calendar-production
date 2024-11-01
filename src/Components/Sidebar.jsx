@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import CalendarList from './CalendarList';
 import { useUser } from '../contexts/UserContext';
-import { navigate } from 'react-router-dom'; // Import Link for navigation
+import { navigate } from 'react-router-dom';
 import Button from './Button';
 
 const Sidebar = () => {
@@ -16,7 +16,6 @@ const Sidebar = () => {
 
   const selectCalendar = (index) => {
     dispatch({ type: 'SET_CURRENT_INDEX', payload: index });
-    // No need to navigate; assuming ICS Creator is on the main page
   };
 
   const handleCreateNewCalendar = () => {

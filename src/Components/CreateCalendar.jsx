@@ -83,7 +83,7 @@ const CreateCalendar = () => {
 
       toast.success('New calendar created successfully!');
       resetForm();
-      navigate('/'); // Redirect to main page or desired route
+      navigate('/');
     } catch (error) {
       toast.error('Error creating calendar: ' + error.message);
     } finally {

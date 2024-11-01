@@ -1,4 +1,3 @@
-import React from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 import { Formik, Form, Field, ErrorMessage } from 'formik';

@@ -1,5 +1,3 @@
-import React from 'react';
-
 const CalendarPage = () => {
   return (
     <div className="p-8 bg-yellow-600 text-white min-h-screen flex items-center justify-center">

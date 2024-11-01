@@ -2,7 +2,6 @@
 
 import PropTypes from 'prop-types';
 import { useUser } from '../contexts/UserContext';
-import Button from './Button'; // Ensure this import is removed if not used elsewhere
 
 const CalendarList = () => {
   const { state, dispatch } = useUser();
