@@ -1,8 +1,8 @@
 // src/Components/Sidebar.jsx
 
 import { useState } from 'react';
-import CalendarList from './CalendarList';
-import { useUser } from '../contexts/UserContext';
+import CalendarList from '../CalendarList';
+import { useUser } from '../../contexts/UserContext';
 import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
