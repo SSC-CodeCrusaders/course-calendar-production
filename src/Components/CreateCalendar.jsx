@@ -6,6 +6,8 @@ import { supabase } from '../utils/supabaseClient';
 import { useUser } from '../contexts/UserContext';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import FormField from './FormField';
+import Button from './Button';
 import PropTypes from 'prop-types';
 
 const CreateCalendar = () => {
@@ -93,7 +95,7 @@ const CreateCalendar = () => {
     <div className="bg-lewisRed min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-white text-3xl font-bold mb-8 text-center">Create New Calendar</h1>
 
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl border-none">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl">
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -102,59 +104,47 @@ const CreateCalendar = () => {
           {({ values, setFieldValue, isSubmitting }) => (
             <Form>
               {/* Start of Course Date */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
-                <label htmlFor="first_day" className="mr-4 w-full sm:w-1/3">Start of Course Date</label>
-                <Field
-                  type="date"
-                  name="first_day"
-                  className="p-2 border rounded w-full sm:w-2/3"
-                  aria-required="true"
-                />
-              </div>
+              <FormField
+                label="Start of Course Date"
+                name="first_day"
+                type="date"
+                placeholder="Select start date"
+              />
               <ErrorMessage name="first_day" component="div" className="text-red-500 text-sm mb-2" />
 
               {/* End of Course Date */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
-                <label htmlFor="last_day" className="mr-4 w-full sm:w-1/3">End of Course Date</label>
-                <Field
-                  type="date"
-                  name="last_day"
-                  className="p-2 border rounded w-full sm:w-2/3"
-                  aria-required="true"
-                />
-              </div>
+              <FormField
+                label="End of Course Date"
+                name="last_day"
+                type="date"
+                placeholder="Select end date"
+              />
               <ErrorMessage name="last_day" component="div" className="text-red-500 text-sm mb-2" />
 
               {/* Start Time */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
-                <label htmlFor="start_time" className="mr-4 w-full sm:w-1/3">Start Time</label>
-                <Field
-                  type="time"
-                  name="start_time"
-                  className="p-2 border rounded w-full sm:w-2/3"
-                  aria-required="true"
-                />
-              </div>
+              <FormField
+                label="Start Time"
+                name="start_time"
+                type="time"
+                placeholder="Select start time"
+              />
               <ErrorMessage name="start_time" component="div" className="text-red-500 text-sm mb-2" />
 
               {/* End Time */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
-                <label htmlFor="end_time" className="mr-4 w-full sm:w-1/3">End Time</label>
-                <Field
-                  type="time"
-                  name="end_time"
-                  className="p-2 border rounded w-full sm:w-2/3"
-                  aria-required="true"
-                />
-              </div>
+              <FormField
+                label="End Time"
+                name="end_time"
+                type="time"
+                placeholder="Select end time"
+              />
               <ErrorMessage name="end_time" component="div" className="text-red-500 text-sm mb-2" />
 
               {/* Days of Class */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
+              <div className="mb-4 flex flex-col sm:flex-row justify-between items-start">
                 <label className="mr-4 w-full sm:w-1/3 text-sm font-semibold">Days of Class</label>
-                <div className="w-full sm:w-2/3 p-2 border rounded focus:outline-none focus:border-lewisRed">
+                <div className="w-full sm:w-2/3 p-2 border rounded focus:outline-none focus:border-lewisRed grid grid-cols-2 gap-2">
                   {Object.keys(values.days_of_class).map((day) => (
-                    <div key={day} className="flex items-center mb-2">
+                    <div key={day} className="flex items-center">
                       <Field
                         type="checkbox"
                         name={`days_of_class.${day}`}
@@ -170,63 +160,50 @@ const CreateCalendar = () => {
               <ErrorMessage name="days_of_class" component="div" className="text-red-500 text-sm mb-2" />
 
               {/* Instructor Name */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
-                <label htmlFor="instructor_name" className="mr-4 w-full sm:w-1/3">Instructor Name</label>
-                <Field
-                  type="text"
-                  name="instructor_name"
-                  className="p-2 border rounded w-full sm:w-2/3"
-                  placeholder="Enter instructor name"
-                  aria-required="true"
-                />
-              </div>
+              <FormField
+                label="Instructor Name"
+                name="instructor_name"
+                type="text"
+                placeholder="Enter instructor name"
+              />
               <ErrorMessage name="instructor_name" component="div" className="text-red-500 text-sm mb-2" />
 
               {/* Course Name */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
-                <label htmlFor="class_name" className="mr-4 w-full sm:w-1/3">Course Name</label>
-                <Field
-                  type="text"
-                  name="class_name"
-                  className="p-2 border rounded w-full sm:w-2/3"
-                  placeholder="Enter course name"
-                  aria-required="true"
-                />
-              </div>
+              <FormField
+                label="Course Name"
+                name="class_name"
+                type="text"
+                placeholder="Enter course name"
+              />
               <ErrorMessage name="class_name" component="div" className="text-red-500 text-sm mb-2" />
 
               {/* Course Location */}
-              <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
-                <label htmlFor="location" className="mr-4 w-full sm:w-1/3">Course Location</label>
-                <Field
-                  type="text"
-                  name="location"
-                  className="p-2 border rounded w-full sm:w-2/3"
-                  placeholder="Enter course location"
-                  aria-required="true"
-                />
-              </div>
+              <FormField
+                label="Course Location"
+                name="location"
+                type="text"
+                placeholder="Enter course location"
+              />
               <ErrorMessage name="location" component="div" className="text-red-500 text-sm mb-2" />
 
-              {/* Save and Cancel Buttons */}
+              {/* Action Buttons */}
               <div className="flex justify-between mt-6">
-                {/* Save Calendar Button */}
-                <button
+                {/* Save and Cancel Buttons */}
+                <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-lewisRed text-white p-3 rounded hover:bg-red-600 transition disabled:opacity-50 w-1/2 mr-2"
+                  className="bg-lewisRed hover:bg-red-600 w-1/2 mr-2"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Calendar'}
-                </button>
+                </Button>
 
-                {/* Cancel Button */}
-                <button
+                <Button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="bg-gray-500 text-white p-3 rounded hover:bg-gray-600 transition w-1/2 ml-2"
+                  className="bg-gray-500 hover:bg-gray-600 w-1/2 ml-2"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </Form>
           )}

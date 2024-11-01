@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import CalendarList from './CalendarList';
 import { useUser } from '../contexts/UserContext';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { navigate } from 'react-router-dom'; // Import Link for navigation
+import Button from './Button';
 
 const Sidebar = () => {
   const { state, dispatch } = useUser();
@@ -18,7 +19,12 @@ const Sidebar = () => {
     // No need to navigate; assuming ICS Creator is on the main page
   };
 
-  // Remove the createNewCal function to prevent pre-creation
+  const handleCreateNewCalendar = () => {
+    // Reset the selected calendar
+    dispatch({ type: 'SET_CURRENT_INDEX', payload: null });
+    // Navigate to the create calendar screen
+    navigate('/create');
+  };
 
   return (
     <>
@@ -38,12 +44,13 @@ const Sidebar = () => {
         />
 
         {/* Create Calendar Button */}
-        <Link
-          to="/create"
+        <Button
+          type="button"
+          onClick={handleCreateNewCalendar}
           className="mt-6 bg-green-600 hover:bg-green-500 text-white p-2 w-full rounded transition duration-200 ease-in-out text-center block"
         >
           + Create Calendar
-        </Link>
+        </Button>
       </div>
 
       {/* Toggle Button */}

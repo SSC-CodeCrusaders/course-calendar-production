@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../contexts/UserContext';
-// import useCalendar from '../hooks/useCalendar'; // Removed as per user instructions
 import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 import CalendarEditor from './CalendarEditor';
+import Button from './Button';
 import PropTypes from 'prop-types';
 
 const ICSCcreator = () => {
   const { state, dispatch } = useUser();
-  // const { fetchCalendarById } = useCalendar(); // Removed as per user instructions
   const [calendarData, setCalendarData] = useState(null);
   const [loadingCalendar, setLoadingCalendar] = useState(false);
 
@@ -79,7 +78,7 @@ const ICSCcreator = () => {
       const updated_calendars = state.calendars.map((cal, idx) =>
         idx === state.current_index ? updatedCalendar : cal
       );
-      dispatch({ type: 'SET_CALENDARS', payload: updated_calendars });
+      dispatch({ type: ACTIONS.SET_CALENDARS, payload: updated_calendars });
       toast.success('Calendar saved locally!');
     }
   };
@@ -184,7 +183,16 @@ END:VCALENDAR
   if (state.calendars.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Get started by creating your first calendar!</p>
+        <div className="text-center p-6 bg-white shadow-md rounded-md">
+          <p className="text-gray-500 mb-4">Get started by creating your first calendar!</p>
+          <Button
+            type="button"
+            onClick={() => dispatch({ type: 'SET_CURRENT_INDEX', payload: 0 })}
+            className="bg-lewisRed hover:bg-red-600"
+          >
+            Create Calendar
+          </Button>
+        </div>
       </div>
     );
   }
@@ -206,11 +214,13 @@ END:VCALENDAR
   }
 
   return (
-    <CalendarEditor
-      calendar={calendarData}
-      onSave={handleSave}
-      onDownloadICS={() => handleDownloadICS(calendarData)}
-    />
+    <div>
+      <CalendarEditor
+        calendar={calendarData}
+        onSave={handleSave}
+        onDownloadICS={() => handleDownloadICS(calendarData)}
+      />
+    </div>
   );
 };
 
