@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import ProgressBar from './ProgressBar';
 import CreateCalendar from '../CreateCalendar';
-import ICSCcreator from '../ICSCreator'; // Import the editor/creator component
-import { useUser } from '../../contexts/UserContext'; // Import the context
+import CalendarEditor from '../CalendarEditor'; 
+import { useUser } from '../../contexts/UserContext'; 
 
 const Homepage = () => {
   const { state } = useUser();
@@ -48,11 +48,6 @@ const Homepage = () => {
     }
   }, [calendars, current_index]);
 
-  const createNewCalendar = () => {
-    const newCalendar = { ...defaultCalendar, isNew: true };
-    setLocalCalendars([...localCalendars, newCalendar]);
-  };
-
   const setCurrentPageForCalendar = (page) => {
     setCurrentPage(page);
     if (current_index !== null && current_index < localCalendars.length) {
@@ -84,7 +79,7 @@ const Homepage = () => {
         return currentCalendar.isNew ? (
           <CreateCalendar currentPage={currentPage} setCurrentPage={setCurrentPageForCalendar} />
         ) : (
-          <ICSCcreator currentPage={currentPage} setCurrentPage={setCurrentPageForCalendar} calendar={currentCalendar} />
+          <CalendarEditor currentPage={currentPage} setCurrentPage={setCurrentPageForCalendar} calendar={currentCalendar} />
         );
       case 1:
         // Placeholder for Calendar Page step

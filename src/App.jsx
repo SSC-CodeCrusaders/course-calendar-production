@@ -10,7 +10,6 @@ import Homepage from './Components/MainPage/Homepage';
 // Lazy load components for performance optimization
 const LazyUserProfile = lazy(() => import('./Components/UserProfile'));
 const LazyDownload = lazy(() => import('./Components/Download'));
-const ICSCcreator = lazy(() => import('./Components/ICSCreator'));
 const CreateCalendar = lazy(() => import('./Components/CreateCalendar'));
 
 // ProtectedRoute component to restrict access to authenticated users only
