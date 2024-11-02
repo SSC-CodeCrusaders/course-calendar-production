@@ -109,13 +109,14 @@ Summary:
 - **Email**: ivansanchez@lewisu.edu
 - **Github**: isanchez-lewisu
 
-- - **Name**: Matthew Shouse
+- **Name**: Matthew Shouse
 - **Email**: matthewdshouse@lewisu.edu
 - **Github**: mshouse8624
 
 - **Name**: Jason Yescas
 - **Email**: jasonyescas@lewisu.edu
 - **Github**: jayes5089
+
 
 ## License
 
