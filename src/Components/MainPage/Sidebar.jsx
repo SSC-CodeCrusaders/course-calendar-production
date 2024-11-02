@@ -1,5 +1,3 @@
-// src/Components/Sidebar.jsx
-
 import { useState } from 'react';
 import CalendarList from '../CalendarList';
 import { useUser } from '../../contexts/UserContext';

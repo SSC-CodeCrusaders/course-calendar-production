@@ -1,5 +1,3 @@
-// src/Components/Auth.jsx
-
 import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useUser } from '../contexts/UserContext';

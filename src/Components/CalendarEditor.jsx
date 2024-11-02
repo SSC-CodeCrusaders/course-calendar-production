@@ -1,5 +1,3 @@
-// src/Components/CalendarEditor.jsx
-
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Formik, Form, Field, ErrorMessage } from 'formik';

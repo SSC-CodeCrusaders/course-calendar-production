@@ -1,5 +1,3 @@
-// src/contexts/UserContext.jsx
-
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { supabase } from '../utils/supabaseClient';

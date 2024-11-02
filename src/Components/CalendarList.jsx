@@ -1,5 +1,3 @@
-// src/Components/CalendarList.jsx
-
 import PropTypes from 'prop-types';
 import { useUser } from '../contexts/UserContext';
 

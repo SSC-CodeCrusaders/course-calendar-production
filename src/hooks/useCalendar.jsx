@@ -1,5 +1,3 @@
-// src/hooks/useCalendar.js
-
 import { useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';

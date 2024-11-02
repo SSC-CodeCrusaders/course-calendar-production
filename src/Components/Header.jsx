@@ -1,5 +1,3 @@
-// src/Components/Header.jsx
-
 import { Link } from "react-router-dom";
 import { useUser } from '../contexts/UserContext';
 import { supabase } from '../utils/supabaseClient';

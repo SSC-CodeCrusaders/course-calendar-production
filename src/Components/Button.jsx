@@ -1,5 +1,3 @@
-// src/Components/Button.jsx
-
 import PropTypes from 'prop-types';
 
 const Button = ({ type, onClick, disabled, children, className }) => {
