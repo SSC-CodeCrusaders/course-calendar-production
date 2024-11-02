@@ -1,5 +1,6 @@
 // src/Components/CalendarEditor.jsx
 
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -9,6 +10,7 @@ import FormField from './FormField';
 import Button from './Button';
 
 const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
+  const [currentPage, setCurrentPage] = useState(0);
   const navigate = useNavigate();
 
   const validationSchema = Yup.object({
@@ -79,7 +81,6 @@ const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
   return (
     <div className="bg-lewisRed min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-white text-3xl font-bold mb-8 text-center">Edit Calendar</h1>
-
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl">
         <Formik
           initialValues={initialValues}

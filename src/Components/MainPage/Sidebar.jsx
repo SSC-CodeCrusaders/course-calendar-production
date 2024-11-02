@@ -7,11 +7,7 @@ import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
   const { state, dispatch } = useUser();
-  const [isOpen, setIsOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  const [isOpen] = useState(true);
 
   const selectCalendar = (index) => {
     dispatch({ type: 'SET_CURRENT_INDEX', payload: index });
@@ -42,17 +38,6 @@ const Sidebar = () => {
           + Create Calendar
         </Link>
       </div>
-
-      {/* Toggle Button */}
-      <button
-        className={`fixed top-16 transform -translate-y-1/2 ${
-          isOpen ? 'translate-x-[16rem]' : 'translate-x-0'
-        } transition-transform duration-300 bg-gray-900 text-white p-3 rounded-full shadow-lg z-50`}
-        onClick={toggleSidebar}
-        aria-label={isOpen ? 'Close Sidebar' : 'Open Sidebar'}
-      >
-        {isOpen ? 'Close' : 'Open'}
-      </button>
     </>
   );
 };

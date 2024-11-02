@@ -1,7 +1,6 @@
 // src/Components/Layout.jsx
 
 import { Outlet } from 'react-router-dom';
-import Sidebar from './MainPage/Sidebar';
 import Header from './Header';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,8 +12,6 @@ const Layout = () => {
       <Header />
 
       <div className="flex flex-1">
-        {/* Sidebar */}
-        <Sidebar />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

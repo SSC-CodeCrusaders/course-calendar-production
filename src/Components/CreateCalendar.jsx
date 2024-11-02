@@ -1,5 +1,6 @@
 // src/Components/CreateCalendar.jsx
 
+import { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { supabase } from '../utils/supabaseClient';
@@ -11,6 +12,7 @@ import Button from './Button';
 import PropTypes from 'prop-types';
 
 const CreateCalendar = () => {
+  const [currentPage, setCurrentPage] = useState(0);
   const { state, dispatch } = useUser();
   const navigate = useNavigate();
 

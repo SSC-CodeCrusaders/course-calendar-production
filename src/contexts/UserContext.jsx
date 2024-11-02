@@ -10,7 +10,7 @@ const initialState = {
   user: null,
   loading: true,
   calendars: [],
-  current_index: null,
+  current_index: 0,
   calendarCache: {},
 };
 
@@ -41,8 +41,14 @@ const reducer = (state, action) => {
         idx === action.payload.index ? action.payload.calendar : cal
       );
       return { ...state, calendars: updatedCalendars };
-    case ACTIONS.SET_CURRENT_INDEX:
-      return { ...state, current_index: action.payload };
+      case ACTIONS.SET_CURRENT_INDEX:
+        if (action.payload >= 0 && action.payload < state.calendars.length) {
+          return { ...state, current_index: action.payload };
+        } else {
+          console.warn('Invalid current_index set:', action.payload);
+          return state; // Avoid updating state with an invalid index
+        }
+      
     case ACTIONS.CACHE_CALENDAR:
       return {
         ...state,
