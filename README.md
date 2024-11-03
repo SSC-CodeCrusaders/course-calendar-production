@@ -121,6 +121,9 @@ Summary:
 - **Email**: nikhilagonuguntla@lewisu.edu
 - **Github**: nikiGN-07
 
+- **Name**: Joshua Butny
+- **Email**: joshuambutny@lewisu.edu
+- **Github**: JobuBoju
 
 ## License
 
