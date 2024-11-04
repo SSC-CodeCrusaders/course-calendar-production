@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useUser } from '../contexts/UserContext';
 
 const CalendarList = () => {
@@ -39,7 +38,5 @@ const CalendarList = () => {
     </div>
   );
 };
-
-CalendarList.propTypes = {};
 
 export default CalendarList;

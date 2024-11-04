@@ -27,7 +27,7 @@ const EmailUpdate = ({ currentEmail, onEmailUpdate }) => {
       toast.success('Email updated successfully');
       onEmailUpdate(newEmail);
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('An unexpected error occurred: ', error);
     } finally {
       setLoading(false);
     }

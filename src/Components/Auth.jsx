@@ -3,7 +3,6 @@ import { supabase } from '../utils/supabaseClient';
 import { useUser } from '../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import PropTypes from 'prop-types';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -89,7 +88,5 @@ const Auth = () => {
     </div>
   );
 };
-
-Auth.propTypes = {};
 
 export default Auth;

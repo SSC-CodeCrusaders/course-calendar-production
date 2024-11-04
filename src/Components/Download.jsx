@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Download = () => {
   return (
     <div className="p-8 bg-blue-600 text-white min-h-screen flex items-center justify-center">

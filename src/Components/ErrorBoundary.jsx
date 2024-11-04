@@ -8,7 +8,7 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-    // Update state to display fallback UI
+    console.log('Error Boundary Line 11: ', error)
     return { hasError: true };
   }
 

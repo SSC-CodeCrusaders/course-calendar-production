@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -8,7 +7,6 @@ import FormField from './FormField';
 import Button from './Button';
 
 const CalendarEditor = ({ calendar, onSave, onDownloadICS }) => {
-  const [currentPage, setCurrentPage] = useState(0);
   const navigate = useNavigate();
 
   const validationSchema = Yup.object({
