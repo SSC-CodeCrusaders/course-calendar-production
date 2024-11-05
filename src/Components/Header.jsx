@@ -37,8 +37,17 @@ const Header = ({ user, setUser }) => {
           <Link className="hover:text-gray" to="/">
             Home
           </Link>
-          <Link className="hover:text-gray" to="/download">
-            Download
+          <Link className="hover:text-gray" to="/aboutus">
+            About Us
+          </Link>
+          <Link className="hover:text-gray" to="/">
+            New2
+          </Link>
+          <Link className="hover:text-gray" to="/">
+            New3
+          </Link>
+          <Link className="hover:text-gray" to="/">
+            New4
           </Link>
           <a
             className="hover:text-gray"
