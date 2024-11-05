@@ -5,6 +5,7 @@ import Header from "./Components/Header";
 import Auth from "./Components/Auth";
 import UserProfile from "./Components/UserProfile";
 import Homepage from "./Components/MainPage/Homepage";
+import AboutUsPage from "./Components/Pages/AboutUsPage"
 import { supabase } from "./utils/supabaseClient";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,6 +52,13 @@ export default function App() {
         />
         {/* Homepage Route */}
         <Route path="/" element={<Homepage />} />
+
+        {/* New 1-4 */}
+        <Route path="/aboutus" element={<AboutUsPage/>} />
+        <Route path="/features" element={null} />
+        <Route path="/faq" element={null} />
+        <Route path="/tutorial" element={null} />
+        {/* New 1-4 */}
 
         {/* Protected Routes */}
         <Route
