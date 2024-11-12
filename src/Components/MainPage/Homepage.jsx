@@ -1,14 +1,19 @@
-// Homepage.js
-import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
-import UserInputForm from './UserInputForm';
-import ProgressBar from './ProgressBar';
+import { useState, useEffect, useContext } from "react";
+import Sidebar from "./Sidebar";
+import UserInputForm from "./UserInputForm";
+import ProgressBar from "./ProgressBar";
+import { AuthContext } from "../../Context/AuthProvider";
+import { fetchSchedules } from "../../utils/supabaseClient";
+import { toast } from "react-toastify";
 
 const Homepage = () => {
+  const { user } = useContext(AuthContext);
+
   const defaultCalendar = {
-    firstDay: '',
-    lastDay: '',
-    classTime: '',
+    firstDay: "",
+    lastDay: "",
+    startTime: "",
+    endTime: "",
     daysOfClass: {
       monday: false,
       tuesday: false,
@@ -18,25 +23,46 @@ const Homepage = () => {
       saturday: false,
       sunday: false,
     },
-    instructorName: '',
-    className: '',
-    location: '',
-    page: 0,
+    instructorName: "",
+    className: "",
+    location: "",
+    page: 0, // Ensure page is initialized to 0
   };
 
   const [calendars, setCalendars] = useState(() => {
-    const storedCalendars = localStorage.getItem('calendars');
+    const storedCalendars = localStorage.getItem("calendars");
     return storedCalendars ? JSON.parse(storedCalendars) : [defaultCalendar];
   });
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const storedIndex = localStorage.getItem("currentIndex");
+    return storedIndex ? parseInt(storedIndex, 10) : 0;
+  });
 
   useEffect(() => {
-    localStorage.setItem('calendars', JSON.stringify(calendars));
-  }, [calendars]);
+    localStorage.setItem("calendars", JSON.stringify(calendars));
+    localStorage.setItem("currentIndex", currentIndex);
+  }, [calendars, currentIndex]);
+
+  useEffect(() => {
+    const loadSchedules = async () => {
+      if (user) {
+        try {
+          const schedules = await fetchSchedules(user.id);
+          setCalendars(schedules.length > 0 ? schedules : [defaultCalendar]);
+        } catch (error) {
+          toast.error("Failed to load schedules from Supabase.");
+          console.log("Error loading calendars: ", error);
+        }
+      }
+    };
+
+    loadSchedules();
+  }, [user]);
 
   const createNewCalendar = () => {
     setCalendars([...calendars, defaultCalendar]);
-    setCurrentIndex(calendars.length);
+    setCurrentIndex(calendars.length); // Set the new calendar as active
   };
 
   const setCurrentPage = (page) => {
@@ -47,13 +73,14 @@ const Homepage = () => {
     });
   };
 
-  const nextPage = () => setCurrentPage(calendars[currentIndex].page + 1);
-  const prevPage = () => setCurrentPage(calendars[currentIndex].page - 1);
-
   const renderCurrentPage = () => {
     const currentCalendar = calendars[currentIndex];
-    switch (currentCalendar.page) {
-      case 0:
+
+    // Ensure a valid page is always set
+    const page = currentCalendar.page ?? 0;
+
+    switch (page) {
+      case 0: // User Input
         return (
           <UserInputForm
             currentIndex={currentIndex}
@@ -61,12 +88,13 @@ const Homepage = () => {
             setCalendars={setCalendars}
           />
         );
-      case 1:
+      case 1: // Calendar Page
         return <div className="h-full flex items-center justify-center">Calendar Page Placeholder</div>;
-      case 2:
+      case 2: // Link Page
         return <div className="h-full flex items-center justify-center">Link Page Placeholder</div>;
-      default:
-        return null;
+      default: // Fallback to User Input
+        setCurrentPage(0); // Automatically reset invalid page
+        return null; // Render nothing temporarily (until page resets)
     }
   };
 
@@ -82,7 +110,10 @@ const Homepage = () => {
       {/* Main Content */}
       <div className="flex flex-col flex-grow p-4 overflow-y-auto">
         {/* Progress Bar */}
-        <ProgressBar currentPage={calendars[currentIndex].page} setCurrentPage={setCurrentPage} />
+        <ProgressBar
+          currentPage={calendars[currentIndex]?.page || 0}
+          setCurrentPage={setCurrentPage}
+        />
         {/* Page Content */}
         <div className="flex-grow">{renderCurrentPage()}</div>
       </div>

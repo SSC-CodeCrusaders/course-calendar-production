@@ -1,9 +1,7 @@
-// ProgressBar.js
-import React from 'react';
+import PropTypes from "prop-types";
 
 const ProgressBar = ({ currentPage, setCurrentPage }) => {
-  const steps = ['User Input', 'Calendar', 'Link'];
-  const isComplete = currentPage === steps.length - 1;
+  const steps = ["User Input", "Calendar", "Link"];
 
   return (
     <div className="flex flex-col items-center mb-6">
@@ -12,9 +10,9 @@ const ProgressBar = ({ currentPage, setCurrentPage }) => {
         {steps.map((_, index) => (
           <div key={index} className="flex-1">
             <div
-              className={`h-1 ${index <= currentPage ? 'bg-blue-500' : 'bg-gray-300'} ${
-                index < steps.length - 1 ? 'mr-2' : ''
-              }`}
+              className={`h-1 ${
+                index <= currentPage ? "bg-blue-500" : "bg-gray-300"
+              } ${index < steps.length - 1 ? "mr-2" : ""}`}
             />
           </div>
         ))}
@@ -26,7 +24,9 @@ const ProgressBar = ({ currentPage, setCurrentPage }) => {
           <button
             key={index}
             onClick={() => setCurrentPage(index)}
-            className={`text-lg ${index === currentPage ? 'font-bold text-white' : 'text-gray'}`}
+            className={`text-lg ${
+              index === currentPage ? "font-bold text-white" : "text-gray-300"
+            }`}
           >
             {step}
           </button>
@@ -34,6 +34,11 @@ const ProgressBar = ({ currentPage, setCurrentPage }) => {
       </div>
     </div>
   );
+};
+
+ProgressBar.propTypes = {
+  currentPage: PropTypes.number.isRequired,
+  setCurrentPage: PropTypes.func.isRequired,
 };
 
 export default ProgressBar;
