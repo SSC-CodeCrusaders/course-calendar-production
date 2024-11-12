@@ -39,44 +39,53 @@ export const generateSchedule = (data) => {
     className,
     location,
     academicTerm,
-    classTime,
+    startTime,
+    endTime,
   } = data;
 
-  const term = academicCalendar[academicTerm];
+  const term = academicCalendar[academicTerm] || { holidays: [] };
   const holidays = term.holidays;
 
   const startDate = new Date(firstDay);
   const endDate = new Date(lastDay);
 
-  const schedule = [];
+  if (isNaN(startDate) || isNaN(endDate)) {
+    throw new Error("Invalid start or end date.");
+  }
 
+  const schedule = [];
   let currentDate = new Date(startDate);
 
   while (currentDate <= endDate) {
-    const dayName = currentDate.toLocaleString("en-US", {
-      weekday: "long",
-    }).toLowerCase();
+    const dayName = currentDate
+      .toLocaleString("en-US", { weekday: "long" })
+      .toLowerCase();
 
     if (daysOfClass[dayName] && !isHoliday(currentDate, holidays)) {
-      // Extract class time (Assuming classTime is in "HH:MM" 24-hour format)
-      const [hour, minute] = classTime.split(":").map(Number);
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      const [endHour, endMinute] = endTime.split(":").map(Number);
+
+      const durationHours = endHour - startHour;
+      const durationMinutes = endMinute - startMinute;
 
       schedule.push({
         title: className,
         start: [
           currentDate.getFullYear(),
-          currentDate.getMonth() + 1, // Months are 0-indexed in JS
+          currentDate.getMonth() + 1,
           currentDate.getDate(),
-          hour,
-          minute,
+          startHour,
+          startMinute,
         ],
-        duration: { hours: 1 }, // Adjust as needed
+        duration: {
+          hours: durationHours,
+          minutes: durationMinutes,
+        },
         location: location,
         description: `Instructor: ${instructorName}`,
       });
     }
 
-    // Move to next day
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
