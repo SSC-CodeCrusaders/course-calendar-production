@@ -1,11 +1,10 @@
-// Sidebar.js
-import React from 'react';
+import PropTypes from 'prop-types';
 
 const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar }) => (
-  <aside className="w-64 bg-lewisred p-5 text-white h-screen overflow-y-auto">
+  <aside className="w-64 bg-lewisRed p-5 text-white h-screen overflow-y-auto">
     <h2 className="text-xl font-semibold mb-6">Your Calendars</h2>
     <div className="flex flex-col gap-4">
-      {calendars.map((_, index) => (
+      {calendars.map((calendar, index) => (
         <button
           key={index}
           className={`block w-full text-left p-2 rounded transition duration-200 ease-in-out ${
@@ -13,7 +12,7 @@ const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar }
           }`}
           onClick={() => setCurrentIndex(index)}
         >
-          Calendar {index + 1}
+          {calendar.className || `Calendar ${index + 1}`}
         </button>
       ))}
     </div>
@@ -25,5 +24,12 @@ const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar }
     </button>
   </aside>
 );
+
+Sidebar.propTypes = {
+  calendars: PropTypes.array.isRequired,
+  currentIndex: PropTypes.number.isRequired,
+  setCurrentIndex: PropTypes.func.isRequired,
+  createNewCalendar: PropTypes.func.isRequired,
+};
 
 export default Sidebar;
