@@ -1,6 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import Sidebar from "./Sidebar";
 import UserInputForm from "./UserInputForm";
+import CalendarPage from "./CalendarPage";
+import LinkPage from "./LinkPage";
 import ProgressBar from "./ProgressBar";
 import { AuthContext } from "../../Context/AuthProvider";
 import { fetchSchedules } from "../../utils/supabaseClient";
@@ -89,9 +91,9 @@ const Homepage = () => {
           />
         );
       case 1: // Calendar Page
-        return <div className="h-full flex items-center justify-center">Calendar Page Placeholder</div>;
+        return <CalendarPage currentCalendar={currentCalendar} />
       case 2: // Link Page
-        return <div className="h-full flex items-center justify-center">Link Page Placeholder</div>;
+        return <LinkPage />
       default: // Fallback to User Input
         setCurrentPage(0); // Automatically reset invalid page
         return null; // Render nothing temporarily (until page resets)
