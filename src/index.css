@@ -18,6 +18,12 @@ body {
   /* Primary background */
 }
 
+.bg-lewisRedDarker {
+  background-color: #630522;
+}
+.bg-lewisRedDarkest {
+  background-color: #5b051f;
+}
 .bg-secondary {
   background-color: #8a1c1e;
   /* Secondary background */

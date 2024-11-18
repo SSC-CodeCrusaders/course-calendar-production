@@ -1,8 +1,12 @@
 import PropTypes from "prop-types";
+import Tooltip from "./Tooltip";
 
 const ProgressBar = ({ currentPage, setCurrentPage }) => {
-  const steps = ["User Input", "Calendar", "Link"];
-
+  const steps = [
+    { name: "User Input", tooltip: "Enter your class information" },
+    { name: "Calendar", tooltip: "View and manage your calendar" },
+    { name: "Link", tooltip: "Link page" },
+  ];
   return (
     <div className="flex flex-col items-center mb-6">
       {/* Progress Line */}
@@ -21,6 +25,7 @@ const ProgressBar = ({ currentPage, setCurrentPage }) => {
       {/* Step Buttons */}
       <div className="flex justify-around w-full bg-lewisRed rounded-lg py-4 px-4">
         {steps.map((step, index) => (
+           <Tooltip key={index} text={step.tooltip}>
           <button
             key={index}
             onClick={() => setCurrentPage(index)}
@@ -28,8 +33,9 @@ const ProgressBar = ({ currentPage, setCurrentPage }) => {
               index === currentPage ? "font-bold text-white" : "text-gray-300"
             }`}
           >
-            {step}
+            {step.name}
           </button>
+          </Tooltip>
         ))}
       </div>
     </div>
