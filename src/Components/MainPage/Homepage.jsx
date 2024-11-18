@@ -101,7 +101,7 @@ const Homepage = () => {
   };
 
   return (
-    <div className="flex bg-lewisRed min-h-screen">
+    <div className="flex bg-lewisRed min-h-screen items-stretch">
       {/* Sidebar */}
       <Sidebar
         calendars={calendars}
