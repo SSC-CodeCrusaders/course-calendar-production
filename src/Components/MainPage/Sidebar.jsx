@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 
 const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar }) => (
-  <aside className="w-64 bg-lewisRed p-5 text-white h-screen overflow-y-auto">
+  <aside className="w-64 bg-lewisRedDarker p-5 text-white flex flex-col">
     <h2 className="text-xl font-semibold mb-6">Your Calendars</h2>
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 flex-grow">
       {calendars.map((calendar, index) => (
         <button
           key={index}
