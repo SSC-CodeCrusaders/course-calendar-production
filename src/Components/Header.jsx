@@ -40,8 +40,8 @@ const Header = ({ user, setUser }) => {
           <Link className="hover:text-gray" to="/aboutus">
             About Us
           </Link>
-          <Link className="hover:text-gray" to="/">
-            New2
+          <Link className="hover:text-gray" to="/features">
+            Features
           </Link>
           <Link className="hover:text-gray" to="/">
             New3
