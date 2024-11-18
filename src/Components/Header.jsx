@@ -28,9 +28,9 @@ const Header = ({ user, setUser }) => {
   };
 
   return (
-    <nav className="bg-lewisRed text-white py-4 shadow-md">
+    <nav className="bg-lewisRedDarkest text-white py-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold">
+        <h1 className="pl-28 text-2xl font-bold">
           <Link to="/">LewisCal</Link>
         </h1>
         <div className="space-x-6 flex items-center">
@@ -40,14 +40,14 @@ const Header = ({ user, setUser }) => {
           <Link className="hover:text-gray" to="/aboutus">
             About Us
           </Link>
-          <Link className="hover:text-gray" to="/">
-            New2
+          <Link className="hover:text-gray" to="/features">
+            Features
           </Link>
-          <Link className="hover:text-gray" to="/">
-            New3
+          <Link className="hover:text-gray" to="/faq">
+            FAQs
           </Link>
-          <Link className="hover:text-gray" to="/">
-            New4
+          <Link className="hover:text-gray" to="/tutorial">
+            Tutorial
           </Link>
           <a
             className="hover:text-gray"
