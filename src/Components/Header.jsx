@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
 import { useEffect } from 'react';
+import { toast } from "react-toastify";
 import PropTypes from 'prop-types';
 
 const Header = ({ user, setUser }) => {
@@ -23,8 +24,19 @@ const Header = ({ user, setUser }) => {
   }, [setUser]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null); // Update user state to null on sign-out
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Failed to log out: " + error.message);
+    } else {
+      // Clear user state
+      setUser(null);
+
+      // Clear localStorage and calendar state
+      localStorage.removeItem("calendars");
+      localStorage.removeItem("currentIndex");
+
+      toast.success("Logged out successfully!");
+    }
   };
 
   return (
