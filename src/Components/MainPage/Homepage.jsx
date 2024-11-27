@@ -112,7 +112,7 @@ const Homepage = () => {
       case 1: // Calendar Page
         return <CalendarPage currentCalendar={currentCalendar} />;
       case 2: // Link Page
-        return <LinkPage />;
+        return <LinkPage currentCalendar={currentCalendar} />;
       default: // Fallback to User Input
         setCurrentPage(0); // Automatically reset invalid page
         return null; // Render nothing temporarily (until page resets)
