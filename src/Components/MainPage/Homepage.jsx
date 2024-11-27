@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 const Homepage = () => {
   const { user } = useContext(AuthContext);
 
+  // Default calendar template
   const defaultCalendar = {
     firstDay: "",
     lastDay: "",
@@ -41,11 +42,13 @@ const Homepage = () => {
     return storedIndex ? parseInt(storedIndex, 10) : 0;
   });
 
+  // Effect to sync calendars and currentIndex with localStorage
   useEffect(() => {
     localStorage.setItem("calendars", JSON.stringify(calendars));
     localStorage.setItem("currentIndex", currentIndex);
   }, [calendars, currentIndex]);
 
+  // Effect to load schedules when user logs in or reset on logout
   useEffect(() => {
     const loadSchedules = async () => {
       if (user) {
@@ -54,19 +57,27 @@ const Homepage = () => {
           setCalendars(schedules.length > 0 ? schedules : [defaultCalendar]);
         } catch (error) {
           toast.error("Failed to load schedules from Supabase.");
-          console.log("Error loading calendars: ", error);
+          console.error("Error loading calendars: ", error);
         }
+      } else {
+        // Reset calendars and localStorage on logout
+        setCalendars([defaultCalendar]);
+        setCurrentIndex(0);
+        localStorage.removeItem("calendars");
+        localStorage.removeItem("currentIndex");
       }
     };
 
     loadSchedules();
   }, [user]);
 
+  // Function to create a new calendar
   const createNewCalendar = () => {
     setCalendars([...calendars, defaultCalendar]);
     setCurrentIndex(calendars.length); // Set the new calendar as active
   };
 
+  // Function to set the current page for a calendar
   const setCurrentPage = (page) => {
     setCalendars((prevCalendars) => {
       const updatedCalendars = [...prevCalendars];
@@ -75,6 +86,14 @@ const Homepage = () => {
     });
   };
 
+  const updateCalendarName = (index, newName) => {
+    setCalendars((prevCalendars) =>
+      prevCalendars.map((calendar, i) =>
+        i === index ? { ...calendar, className: newName } : calendar
+      )
+    );
+  };
+  
   const renderCurrentPage = () => {
     const currentCalendar = calendars[currentIndex];
 
@@ -91,9 +110,9 @@ const Homepage = () => {
           />
         );
       case 1: // Calendar Page
-        return <CalendarPage currentCalendar={currentCalendar} />
+        return <CalendarPage currentCalendar={currentCalendar} />;
       case 2: // Link Page
-        return <LinkPage />
+        return <LinkPage currentCalendar={currentCalendar} />;
       default: // Fallback to User Input
         setCurrentPage(0); // Automatically reset invalid page
         return null; // Render nothing temporarily (until page resets)
@@ -108,6 +127,7 @@ const Homepage = () => {
         currentIndex={currentIndex}
         setCurrentIndex={setCurrentIndex}
         createNewCalendar={createNewCalendar}
+        updateCalendarName={updateCalendarName}
       />
       {/* Main Content */}
       <div className="flex flex-col flex-grow p-4 overflow-y-auto">
