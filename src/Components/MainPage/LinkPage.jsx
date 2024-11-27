@@ -34,7 +34,7 @@ const LinkPage = ({ currentCalendar }) => {
 
       // Generate and upload ICS file, then set the link
       const link = await generateICSAndUpload(scheduleEvents, holidayEvents, className);
-      setIcsLink(link);
+      setIcsLink(link.publicUrl);
       toast.success("ICS link generated successfully!");
     } catch (error) {
       console.error("Failed to generate ICS link:", error);
@@ -70,14 +70,14 @@ const LinkPage = ({ currentCalendar }) => {
               >
                 Copy Link
               </button>
-              <a
+              {/* <a
                 href={icsLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 bg-blue-500 text-white px-4 py-2 rounded mr-4"
               >
                 Open Link
-              </a>
+              </a> */}
             </div>
             <div className="text-left">
               <h2 className="text-xl font-semibold mb-4">How to Use This Link</h2>
