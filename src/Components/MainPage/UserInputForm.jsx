@@ -2,8 +2,6 @@ import { useContext } from "react";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
 import { academicCalendar } from "../../utils/academicCalendar";
-import { generateSchedule } from "../../utils/scheduleGenerator";
-import { generateICS } from "../../utils/icsGenerator";
 import { saveSchedule, updateSchedule } from "../../utils/supabaseClient";
 import { AuthContext } from "../../Context/AuthProvider";
 
@@ -55,29 +53,6 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
     }
   };
 
-  const generateICSHandler = () => {
-    try {
-      const { className, startTime, endTime } = currentCalendar;
-
-      if (!className || !startTime || !endTime) {
-        toast.error("Please ensure all fields are filled to generate the ICS file.");
-        return;
-      }
-
-      const scheduleEvents = generateSchedule(currentCalendar);
-      const termHolidays = academicCalendar[currentCalendar.academicTerm]?.holidays || [];
-      const holidayEvents = termHolidays.map((holiday) => ({
-        name: holiday.name,
-        date: new Date(holiday.date),
-      }));
-
-      generateICS(scheduleEvents, holidayEvents, className);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to generate ICS file.");
-    }
-  };
-
   return (
     <div className="bg-lewisRed min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-white text-3xl font-bold mb-8 text-center">Class Schedule Creator</h1>
@@ -89,10 +64,13 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
           </label>
           <select
             id="academicTerm"
-            value={currentCalendar.academicTerm || "fall2024"}
+            value={currentCalendar.academicTerm || ""}
             onChange={(e) => updateCurrentCalendar("academicTerm", e.target.value)}
             className="p-2 border rounded w-full"
           >
+            <option value="" disabled>
+              Select an academic term
+            </option>
             {Object.keys(academicCalendar).map((term) => (
               <option key={term} value={term}>
                 {term.charAt(0).toUpperCase() + term.slice(1)}
@@ -225,13 +203,6 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
           className="mt-4 bg-green-500 text-white px-4 py-2 rounded mr-4"
         >
           Save Schedule
-        </button>
-        <button
-          type="button"
-          onClick={generateICSHandler}
-          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Generate ICS
         </button>
       </form>
     </div>
