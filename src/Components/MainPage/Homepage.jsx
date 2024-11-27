@@ -86,7 +86,14 @@ const Homepage = () => {
     });
   };
 
-  // Function to render the current page based on `page` property
+  const updateCalendarName = (index, newName) => {
+    setCalendars((prevCalendars) =>
+      prevCalendars.map((calendar, i) =>
+        i === index ? { ...calendar, className: newName } : calendar
+      )
+    );
+  };
+  
   const renderCurrentPage = () => {
     const currentCalendar = calendars[currentIndex];
 
@@ -120,6 +127,7 @@ const Homepage = () => {
         currentIndex={currentIndex}
         setCurrentIndex={setCurrentIndex}
         createNewCalendar={createNewCalendar}
+        updateCalendarName={updateCalendarName}
       />
       {/* Main Content */}
       <div className="flex flex-col flex-grow p-4 overflow-y-auto">
