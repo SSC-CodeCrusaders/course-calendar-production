@@ -34,7 +34,6 @@ const LinkPage = ({ currentCalendar }) => {
 
       // Generate and upload ICS file, then set the link
       const link = await generateICSAndUpload(scheduleEvents, holidayEvents, className);
-      console.log("Link received:", link.publicUrl);
       setIcsLink(link.publicUrl);
       toast.success("ICS link generated successfully!");
     } catch (error) {
