@@ -77,6 +77,70 @@ const CalendarPage = ({ currentCalendar }) => {
     return currentDate >= firstDayDate && currentDate <= lastDayDate;
   };
 
+  // List of holidays and observances based off of LewisU academic calendar
+  const holidays = [
+    //Fall 2024
+    {date: '2024-08-26', name: 'Full Day of Classes for the 16-Week and First 8-Week Session'},
+    {date: '2024-09-02', name: 'Labor Day: No Classes'},
+    {startDate: '2024-10-10', endDate: '2024-10-11', name: 'Fall Break: No classes for 16-Week Courses'},
+    {date: '2024-10-19', name: 'Last Day of Classes for First 8-Week Session'},
+    {date: '2024-10-21', name: 'Beginning of Second 8-Week Session'},
+    {date: '2024-11-27', name: 'Thanksgiving Holiday Recess Begins: No Classes'},
+    {date: '2024-12-02', name: 'Classes Resume'},
+    {date: '2024-12-07', name: 'Final Day of Classes for 16-Week Term'},
+    {startDate: '2024-12-09', endDate: '2024-12-14', name: 'Final Exams'},
+    {startDate: '2024-12-13', endDate: '2024-12-14', name: 'Commencement Weekend'},
+    {date: '2024-12-14', name: 'Final Day of Second 8-Week Session'},
+    {date: '2024-12-20', name: 'Fall Term Degree Conferral Date'},
+    //Spring 2025
+    {startDate: '2025-01-06', endDate: '2025-01-17', name: 'January Term'},
+    {date: '2025-01-20', name: 'Birthday of Martin Luther King Jr.'},
+    {date: '2025-01-21', name: 'Full Day of Classes for the 16-Week Term and First 8-Week Session'},
+    {date: '2025-03-15', name: 'Last Day of Classes for First 8-Week Session'},
+    {startDate: '2025-03-17', endDate: '2025-03-22', name: 'Spring Break: No Classes'},
+    {date: '2025-03-24', name: 'Classes Resume for 16-Week Term and Start Second 8-Week Session'},
+    {startDate: '2025-04-17', endDate:'2025-04-21', name: 'Easter Holiday Recess: No Classes'},
+    {date: '2025-05-10', name: 'Final Day of Classes for 16-Week Term'},
+    {startDate: '2025-05-12', endDate: '2025-05-17', name: 'Final Exams for 16-Week Term'},
+    {date: '2025-05-17', name: 'Last Day of Classes for the Second 8-Week Session'},
+    {startDate: '2025-05-16', endDate: '2025-05-17', name: 'Commencement Weekend'},
+    {date: '2025-05-23', name: 'Spring Term Degree Conferral Date'},
+    //Summer 2025
+    {date: '2025-05-19', name: 'Start First 7-Week Session'},
+    {date: '2025-05-19', name: 'Standard 4-Week Session (dates may vary, standard end date June 15)'},
+    {date: '2025-05-19', name: 'Standard 10-Week Session (dates may vary, standard end date July 19)'},
+    {date: '2025-05-19', name: 'Start Standard 14-Week Session'},
+    {date: '2025-06-02', name: 'Standard 6-Week Session (dates may vary, standard end July 13)'},
+    {date: '2025-06-02', name: 'Standard 8-Week Session (dates may vary, standard end July 26)'},
+    {date:'2025-06-19', name: 'Juneteenth Observed: No Classes'},
+    {startDate: '2025-07-03', endDate: '2025-07-04', name: 'Independence Day Holiday: No Classes'},
+    {date: '2025-07-05', name: 'End First 7-Week Session'},
+    {date: '2025-07-07', name: 'Start Second 7-Week Session'},
+    {date: '2025-08-23', name: 'End of 14-Week Term and Second 7-Week Term'},
+    {date: '2025-08-29', name: 'Summer Term Degree Conferral Date'},
+  ];
+
+  // Filter holidays and observances that fall within the current month
+  const holidaysThisMonth = holidays.filter((holiday) => {
+    if (holiday.date) {
+      // Single-day holiday/observance
+      const holidayDate = new Date(holiday.date);
+      return (
+        holidayDate.getMonth() === currentMonth &&
+        holidayDate.getFullYear() === currentYear
+      );
+    } else if (holiday.startDate && holiday.endDate) {
+      // Multi-day holiday/observance
+      const start = new Date(holiday.startDate);
+      const end = new Date(holiday.endDate);
+      return (
+        (start.getMonth() === currentMonth && start.getFullYear() === currentYear) ||
+        (end.getMonth() === currentMonth && end.getFullYear() === currentYear)
+      );
+    }
+    return false;
+  });
+
   return (
     <div className="flex flex-col bg-lewisRed text-white rounded-lg p-6">
       {/* Calendar Navigation */}
@@ -135,6 +199,20 @@ const CalendarPage = ({ currentCalendar }) => {
             </div>
           );
         })}
+      </div>
+      {/* Holidays Section */}
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold text-white mb-2"> Holidays and Observances</h3>
+        <ul className="list-disc pl-5 text-white">
+          {holidaysThisMonth.map((holiday) => (
+            <li key={holiday.date || holiday.startDate}>
+              <span className="font-bold">{holiday.name}</span> - {' '}
+              {holiday.date
+              ? new Date(holiday.date).toLocaleDateString()
+              : `${new Date(holiday.startDate).toLocaleDateString()} to ${new Date(holiday.endDate).toLocaleDateString()}`}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
