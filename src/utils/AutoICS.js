@@ -2,7 +2,7 @@ import Tesseract from "tesseract.js";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  apiKey: 'sk-zTDpKwBuNfLiPm6zjWFtrFKT3wacxx1Pe5VBIhKsfzT3BlbkFJSIq5C2_koHou8oxLaG9KFDImdnlnPEl5Ap9mHDE8oA',
   dangerouslyAllowBrowser: true, // temporary
 });
 
