@@ -9,6 +9,7 @@ import AboutUsPage from "./Components/Pages/AboutUsPage"
 import TutorialPage from "./Components/Pages/TutorialPage";
 import FeaturesPage from "./Components/Pages/FeaturesPage"
 import FaqPage from "./Components/Pages/faqPage";
+import ContactUsPage from "./Components/Pages/ContactUsPage"
 import { supabase } from "./utils/supabaseClient";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/tutorial" element={<TutorialPage/>} />
         <Route path="/features" element={<FeaturesPage/>} />
         <Route path="/faq" element={<FaqPage/>} />
+        <Route path="/contactus" element={<ContactUsPage/>} />
         {/* New 1-4 */}
 
         {/* Protected Routes */}

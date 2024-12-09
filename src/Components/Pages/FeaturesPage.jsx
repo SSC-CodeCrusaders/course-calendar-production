@@ -1,5 +1,7 @@
 import React from "react";
 
+
+
 const FeaturesPage = () => {
   return (
     <div className="container mx-auto px-8 py-12">
@@ -9,7 +11,26 @@ const FeaturesPage = () => {
       <p className="text-center text-gray-700 mb-12">
         LewisCal simplifies your academic schedule management. Explore some of
         the core features that make this tool invaluable for both students and
-        faculty.
+        faculty. 
+        <br></br> If you would like to suggest features please click&nbsp;
+        <a href="https://docs.google.com/forms/d/1VWIMOUrLhk1yNOYR5OCSVOFuWmRcDQYqCbBNADK2gxg/edit" target="_blank" 
+        style={{
+           color: 'blue',             // Default color for unvisited links
+           textDecoration: 'underline', // Default underline for links
+            ':visited': {
+              color: 'purple'          // Default color for visited links
+            },
+            ':hover': {
+               color: 'red',            // Default color on hover
+               textDecoration: 'underline' // Maintain underline on hover
+            },
+             ':active': {
+               color: 'red'             // Default color for active links
+            }
+          }}
+          >
+        here
+        </a>.
       </p>
       <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
         {/* Feature 1 */}
