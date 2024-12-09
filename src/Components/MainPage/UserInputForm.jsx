@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { academicCalendar } from "../../utils/academicCalendar";
 import { saveSchedule, updateSchedule } from "../../utils/supabaseClient";
 import { AuthContext } from "../../Context/AuthProvider";
+import { generateICSAndUpload } from "../../utils/icsGenerator";
 
 const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
   const { user } = useContext(AuthContext);
@@ -26,7 +27,7 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
 
   const saveScheduleHandler = async () => {
     try {
-      const { firstDay, lastDay, className, instructorName, location } = currentCalendar;
+      const { firstDay, lastDay, className, instructorName, location, notes } = currentCalendar;
 
       // Validate required fields
       if (!firstDay || !lastDay || !className || !instructorName || !location) {
@@ -47,6 +48,10 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
         localStorage.setItem("calendars", JSON.stringify(calendars));
         toast.success("Schedule saved locally!");
       }
+      // This should generate the notes within the ICS file
+      const publicUrl = await generateICSAndUpload(scheduleEvents, holidayEvents, className, notes);
+      console.log('ICS file public URL:', publicUrl);
+
     } catch (error) {
       console.error(error);
       toast.error("Failed to save schedule.");
@@ -193,6 +198,21 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
             value={currentCalendar.location || ""}
             onChange={(e) => updateCurrentCalendar("location", e.target.value)}
             className="p-2 border rounded w-full"
+          />
+        </div>
+
+        {/* Notes Section */}
+          <div className="mb-4">
+          <label htmlFor="notes" className="block font-medium">
+            Notes:
+          </label>
+          <textarea
+          id="notes"
+          value={currentCalendar.notes || ""}
+          onChange={(e) => updateCurrentCalendar("notes", e.target.value)}
+          className="p-2 border rounded w-full"
+          rows="4"
+          placeholder="Add any additional notes here..."
           />
         </div>
 

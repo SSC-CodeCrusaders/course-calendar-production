@@ -6,16 +6,17 @@ import { supabase } from "./supabaseClient";
  * @param {Array} scheduleEvents - Array of class events.
  * @param {Array} holidayEvents - Array of holiday events.
  * @param {string} className - Name of the class for naming the ICS file.
+ * @param {string} notes - Allows notes to be included in the ICS file.
  * @returns {string} Public URL of the uploaded ICS file.
  */
-export const generateICSAndUpload = async (scheduleEvents, holidayEvents, className) => {
+export const generateICSAndUpload = async (scheduleEvents, holidayEvents, className, notes) => {
   const allEvents = [
     ...scheduleEvents.map((event) => ({
       title: event.title,
       start: event.start,
       duration: event.duration,
-      location: event.location,
-      description: event.description,
+      location: sanitizeText(event.location),
+      description: event.description + (notes ? `\n\nNotes: ${notes}` : ""),
     })),
     ...holidayEvents.map((holiday) => ({
       title: holiday.name,
@@ -24,7 +25,7 @@ export const generateICSAndUpload = async (scheduleEvents, holidayEvents, classN
         holiday.date.getMonth() + 1,
         holiday.date.getDate(),
       ],
-      description: `${holiday.name} Holiday`,
+      description: `${holiday.name} Holiday` + (notes ? `\n\nNotes: ${notes}` : ""),
     })),
   ];
 
