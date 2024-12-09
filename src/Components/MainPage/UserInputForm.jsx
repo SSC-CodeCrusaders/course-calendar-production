@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { academicCalendar } from "../../utils/academicCalendar";
 import { saveSchedule, updateSchedule } from "../../utils/supabaseClient";
 import { AuthContext } from "../../Context/AuthProvider";
+import ImageUploadProcessor from "./ImageUploadProcessor";
 
 const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
   const { user } = useContext(AuthContext);
@@ -54,9 +55,11 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
   };
 
   return (
-    <div className="bg-lewisRed min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-white text-3xl font-bold mb-8 text-center">Class Schedule Creator</h1>
-      <form className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-lewisRed">
+    <h1 className="text-white text-3xl font-bold mb-8 text-center">Class Schedule Creator</h1>
+    <div className="flex flex-col lg:flex-row items-center justify-center gap-8 w-full max-w-7xl px-2">
+    
+    <form className="w-full lg:w-full bg-white p-6 rounded-lg shadow-lg">
         {/* Academic Term */}
         <div className="mb-4">
           <label htmlFor="academicTerm" className="block font-medium">
@@ -205,6 +208,33 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
           Save Schedule
         </button>
       </form>
+
+      {/* Middle Divider with "OR" */}
+            <div className="flex items-center text-white justify-center text-gray-500 font-bold my-4 lg:my-0">
+        <span className="border-t  border-gray-300 w-8 mx-2  lg:hidden"></span> {/* Horizontal line for small screens */}
+        OR
+        <span className="border-t border-gray-300 w-8 mx-2 lg:hidden"></span> {/* Horizontal line for small screens */}
+      </div>
+
+       {/* Image Upload Component */}
+       <div className="w-full lg:w-1/2 bg-white p-6 rounded-lg shadow-lg text-center">
+       <ImageUploadProcessor
+        onProcessImage={(data) => {
+          // Merge the processed data into the current calendar
+          const updatedCalendars = calendars.map((calendar, index) =>
+            index === currentIndex
+              ? { ...calendar, ...data.calendars[0] } // Merge processed data
+              : calendar
+          );
+
+          // Update the state
+          setCalendars(updatedCalendars);
+  }}
+  currentIndex={currentIndex}
+/>
+
+        </div>
+    </div>
     </div>
   );
 };
