@@ -27,20 +27,21 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
 
   const saveScheduleHandler = async () => {
     try {
-      const { firstDay, lastDay, className, instructorName, location } = currentCalendar;
-
+      const { firstDay, lastDay, className, instructorName, location, notes } = currentCalendar;
+  
       // Validate required fields
       if (!firstDay || !lastDay || !className || !instructorName || !location) {
         toast.error("Please fill out all required fields.");
         return;
       }
-
+  
+      const scheduleData = { ...currentCalendar, notes }; // Include notes
       if (user) {
         if (currentCalendar.id) {
-          await updateSchedule(currentCalendar.id, currentCalendar);
+          await updateSchedule(currentCalendar.id, scheduleData);
           toast.success("Schedule updated in your account!");
         } else {
-          const savedSchedule = await saveSchedule({ ...currentCalendar, user_id: user.id });
+          const savedSchedule = await saveSchedule({ ...scheduleData, user_id: user.id });
           updateCurrentCalendar("id", savedSchedule[0].id);
           toast.success("Schedule saved to your account!");
         }
@@ -197,6 +198,20 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
             onChange={(e) => updateCurrentCalendar("location", e.target.value)}
             className="p-2 border rounded w-full"
           />
+        </div>
+
+        {/* Notes */}
+        <div className="mb-4">
+          <label htmlFor="notes" className="block font-medium">
+            Notes (optional):
+          </label>
+          <textarea
+            id="notes"
+            value={currentCalendar.notes || ""}
+            onChange={(e) => updateCurrentCalendar("notes", e.target.value)}
+            className="p-2 border rounded w-full"
+            rows="4"
+          ></textarea>
         </div>
 
         {/* Save and Generate Buttons */}

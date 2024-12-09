@@ -34,6 +34,7 @@ export const fetchSchedules = async (userId) => {
       endTime: calendar.end_time,
       daysOfClass: typeof calendar.days_of_class === "string" ? JSON.parse(calendar.days_of_class) : calendar.days_of_class,
       createdAt: calendar.created_at,
+      notes: calendar.notes,
     }));
   } catch (error) {
     console.error("Error fetching schedules:", error.message);
@@ -54,6 +55,7 @@ export const saveSchedule = async (schedule) => {
       start_time: schedule.startTime,
       end_time: schedule.endTime,
       days_of_class: JSON.stringify(schedule.daysOfClass),
+      notes: schedule.notes,
     });
 
     if (error) throw new Error(error.message);
@@ -79,6 +81,7 @@ export const updateSchedule = async (id, updates) => {
         start_time: updates.startTime,
         end_time: updates.endTime,
         days_of_class: JSON.stringify(updates.daysOfClass),
+        notes: updates.notes,
       })
       .eq("id", id);
 
