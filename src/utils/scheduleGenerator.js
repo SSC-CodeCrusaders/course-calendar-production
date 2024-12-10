@@ -41,6 +41,7 @@ export const generateSchedule = (data) => {
     academicTerm,
     startTime,
     endTime,
+    notes,
   } = data;
 
   const term = academicCalendar[academicTerm] || { holidays: [] };
@@ -82,7 +83,7 @@ export const generateSchedule = (data) => {
           minutes: durationMinutes,
         },
         location: location,
-        description: `Instructor: ${instructorName}`,
+        description: `Instructor: ${instructorName}${notes ? ` Notes: ${notes}` : ""}`,
       });
     }
 

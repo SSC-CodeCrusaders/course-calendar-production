@@ -29,7 +29,8 @@ const Homepage = () => {
     instructorName: "",
     className: "",
     location: "",
-    page: 0, // Ensure page is initialized to 0
+    notes: "",
+    page: 0,
   };
 
   const [calendars, setCalendars] = useState(() => {
