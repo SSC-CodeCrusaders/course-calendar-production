@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -20,12 +22,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
-
-      - name: Create .env file
-        run: |
-          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
-          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
-          cat .env
 
       - name: npm install, build, and test
         run: |
@@ -47,6 +43,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -57,9 +54,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C055BEECD3CC4CA589A8AF1AC74F76CA }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F993F53412144386A3A2381DB57B19F3 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_696C8F0D8A0043EB9CD8B2F1AE805A13 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F932EF2BE72649EB9AFED1E4EF6F58C7 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D7C00B2AD036415A813E751F1E83E79E }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8E3ADEB817F44964BC0C8298C6FDEB3C }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
@@ -67,5 +64,5 @@ jobs:
         with:
           app-name: 'lewiscal'
           slot-name: 'Production'
-          package: ./dist
+          package: .
           
