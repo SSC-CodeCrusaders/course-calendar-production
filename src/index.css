@@ -53,3 +53,9 @@ body {
   padding: 20px;
   box-sizing: border-box;
 }
+
+@font-face {
+  font-family: 'Crimson Text';
+  src: url('/fonts/CrimsonText-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
