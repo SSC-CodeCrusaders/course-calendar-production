@@ -10,6 +10,9 @@ export const theme = {
       black: "#000000",
       lewisRed: "#940731",  // Same color as the MyLewis portal
     },
+    fontFamily: {
+      crimson: ["'Crimson Text'", "serif"],
+    },
   },
 };
 export const plugins = [];
