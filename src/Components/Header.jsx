@@ -1,50 +1,93 @@
 // src/Components/Header.jsx
 import { Link } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from "react-toastify";
 import PropTypes from 'prop-types';
+import { auth, db } from "../utils/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 
 const Header = ({ user, setUser }) => {
+  const [userEmail, setUserEmail] = useState('');
   useEffect(() => {
-    const getSession = async () => {
-      // Fetch the current user session from Supabase
-      const { data } = await supabase.auth.getSession();
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        setUserEmail(currentUser.email); // Set email immediately from auth
 
-      // Update user state with session data if available, otherwise set to null
-      setUser(data.session?.user ?? null);
-    };
-
-    getSession(); // Invoke session retrieval on mount
-
-    // Set up a listener to detect authentication state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null); // Update user state accordingly
+        // Fetch email from Firestore if available
+        try {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          if (userDoc.exists()) {
+            setUserEmail(userDoc.data().email); // Override if Firestore has a stored email
+          }
+        } catch (error) {
+          toast.error("Error fetching user data: " + error.message);
+        }
+      } else {
+        setUser(null);
+        setUserEmail('');
+      }
     });
 
-    return () => {
-      // Cleanup function to unsubscribe from auth state changes
-      authListener?.subscription.unsubscribe();
-    };
+    return () => unsubscribe();
   }, [setUser]);
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      // Display error message if sign-out fails
-      toast.error("Failed to log out: " + error.message);
-    } else {
-      // Clear user state on successful sign-out
+    try {
+      await signOut(auth);
       setUser(null);
-
-      // Remove stored calendar data from localStorage
+      setUserEmail('');
       localStorage.removeItem("calendars");
       localStorage.removeItem("currentIndex");
-
-      // Notify user of successful logout
       toast.success("Logged out successfully!");
+    } catch (error) {
+      toast.error("Failed to log out: " + error.message);
     }
   };
+
+  // SECTION BELOW USES SUPABASE, MIGHT REMOVE IN THE FUTURE
+  // useEffect(() => {
+  //   const getSession = async () => {
+  //     // Fetch the current user session from Supabase
+  //     const { data } = await supabase.auth.getSession();
+
+  //     // Update user state with session data if available, otherwise set to null
+  //     setUser(data.session?.user ?? null);
+  //   };
+
+  //   getSession(); // Invoke session retrieval on mount
+
+  //   // Set up a listener to detect authentication state changes
+  //   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+  //     setUser(session?.user ?? null); // Update user state accordingly
+  //   });
+
+  //   return () => {
+  //     // Cleanup function to unsubscribe from auth state changes
+  //     authListener?.subscription.unsubscribe();
+  //   };
+  // }, [setUser]);
+
+  // const handleSignOut = async () => {
+  //   const { error } = await supabase.auth.signOut();
+  //   if (error) {
+  //     // Display error message if sign-out fails
+  //     toast.error("Failed to log out: " + error.message);
+  //   } else {
+  //     // Clear user state on successful sign-out
+  //     setUser(null);
+
+  //     // Remove stored calendar data from localStorage
+  //     localStorage.removeItem("calendars");
+  //     localStorage.removeItem("currentIndex");
+
+  //     // Notify user of successful logout
+  //     toast.success("Logged out successfully!");
+  //   }
+  // };
 
   return (
     <nav className="bg-lewisRedDarkest text-white py-4 relative flex items-center justify-between px-4">
@@ -76,7 +119,7 @@ const Header = ({ user, setUser }) => {
         ) : (
           <>
             {/* Display user email and greeting */}
-            <span className="text-sm px-3">Welcome, {user.email}</span>
+            <span className="text-sm px-3">Welcome, {userEmail || "User"}</span>
                   
             {/* Profile link for logged-in users */}
             <Link className="hover:text-gray transition ml-4" to="/profile">Profile</Link>
