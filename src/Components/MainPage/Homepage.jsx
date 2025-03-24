@@ -6,7 +6,8 @@ import LinkPage from "./LinkPage";
 import ProgressBar from "./ProgressBar";
 import { AuthContext } from "../../Context/AuthProvider";
 import { fetchSchedules } from "../../utils/supabaseClient";
-import { toast } from "react-toastify";
+import { fetchUserCalendars } from "../../utils/firestoreDatabase"
+// imports added to use Firestore
 
 const Homepage = () => {
   const { user } = useContext(AuthContext);
@@ -51,10 +52,15 @@ const Homepage = () => {
 
   // Effect to load schedules when user logs in or reset on logout
   useEffect(() => {
+    // creates a method that when called will load schedules from Firestore
     const loadSchedules = async () => {
+      // Checks if there is a user signed in
       if (user) {
+        // if there is a user, it will call a method from the firestoreDatabase.js file to get the calendars
         try {
-          const schedules = await fetchSchedules(user.id);
+          const schedules = fetchUserCalendars();
+          // Supabase approach to fetch calendars from their database
+          // const schedules = await fetchSchedules(user.id);
           setCalendars(schedules.length > 0 ? schedules : [defaultCalendar]);
         } catch (error) {
           toast.error("Failed to load schedules from Supabase.");
@@ -104,6 +110,9 @@ const Homepage = () => {
     switch (page) {
       case 0: // User Input
         return (
+          // calls the userInputForm passing through the currentIndex of the calendar
+          // the calendars object holding all of the data important for calendars
+          // and the method setCalendars created from the useState() to change the calendars
           <UserInputForm
             currentIndex={currentIndex}
             calendars={calendars}
