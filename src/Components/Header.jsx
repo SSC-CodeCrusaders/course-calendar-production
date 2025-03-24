@@ -9,37 +9,53 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 
+// Header is a functional component that receives the current user logged in and the function to update the current user
 const Header = ({ user, setUser }) => {
+  // userEmail is a local state that stores the user's email
   const [userEmail, setUserEmail] = useState('');
+  // useEffect for an Authentication listener and runs when the component mounts and listens for authentication state changes
   useEffect(() => {
+    // onAuthStateChanged subscirbes to Firebase auth changes
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      // if a user is logged in
       if (currentUser) {
+        // This will update the global state
         setUser(currentUser);
         setUserEmail(currentUser.email); // Set email immediately from auth
 
-        // Fetch email from Firestore if available
+        // Fetch email from Firebase if available
         try {
+          // retrieves the user's document from Firestore with the "users" collection using their uid as the document key
           const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          // Checks if the document exists
           if (userDoc.exists()) {
-            setUserEmail(userDoc.data().email); // Override if Firestore has a stored email
+            // If Firebase has an email store it overrides the userEmail from authentication
+            setUserEmail(userDoc.data().email); // Override if Firebase has a stored email
           }
         } catch (error) {
           toast.error("Error fetching user data: " + error.message);
         }
+      // if no user is logged in
       } else {
+        // sets the user to null and the email to an empty string
         setUser(null);
         setUserEmail('');
       }
     });
 
+    // cleans up and removes the listener when the component unmounts
     return () => unsubscribe();
   }, [setUser]);
 
+  // A function to handle the signing out of the user
   const handleSignOut = async () => {
     try {
+      // calls the signOut method to log the user out
       await signOut(auth);
+      // resets the user and their email to null and an empty string respectively
       setUser(null);
       setUserEmail('');
+      // removes locally stored calendar data
       localStorage.removeItem("calendars");
       localStorage.removeItem("currentIndex");
       toast.success("Logged out successfully!");
@@ -119,7 +135,7 @@ const Header = ({ user, setUser }) => {
         ) : (
           <>
             {/* Display user email and greeting */}
-            <span className="text-sm px-3">Welcome, {userEmail || "User"}</span>
+            <span className="text-sm px-3">Welcome, {userEmail}</span>
                   
             {/* Profile link for logged-in users */}
             <Link className="hover:text-gray transition ml-4" to="/profile">Profile</Link>

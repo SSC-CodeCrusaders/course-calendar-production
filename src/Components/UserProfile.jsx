@@ -7,6 +7,7 @@ import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthPro
 import { onAuthStateChanged } from 'firebase/auth';
 
 const UserProfile = () => {
+  // Uses useState to manage various states
   const [user, setUser] = useState(null);
 
   const [email, setEmail] = useState('');
@@ -20,8 +21,11 @@ const UserProfile = () => {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   useEffect(() => {
+    // uses Firebase's AuthStateChanged method to listen for authentication state changes
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      // If it does notice a change
       if (user) {
+        // updates the new user and the new email
         setUser(user);
         setEmail(user.email);
       } else {
@@ -29,6 +33,7 @@ const UserProfile = () => {
       }
     });
     
+    // removes the listener when the component unmounts
     return () => unsubscribe();
 
     // MAY NOT NEED THE CODE SECTION BELOW, IT USES SUPABASE
@@ -52,14 +57,19 @@ const UserProfile = () => {
 
   // Handle email update
   const handleUpdateEmail = async () => {
+    // if the user is not null then it simply just returns the function 
     if (!user) return;
 
     try {
+      // Updates the user's email using a Firebase method
       await updateEmail(user, newEmail);
-      setEmail(newEmail)
+      // Updates the local use state with the new email
+      setEmail(newEmail);
       setShowEmailForm(false);
+      // displays a toast displaying it was successful
       toast.success("Email Updated Successfully.");
     } catch (error) {
+      // displays a toast displaying it was unsuccessful
       toString.error("Failed to update email:" + error.message);
     }
 
@@ -96,6 +106,8 @@ const UserProfile = () => {
     // Added for Firebase authentication 
     if (!user) return;
 
+    // Required by Firebase for security, Re-authenticates the user using their current password before changing the password
+    // This is the two sections that require you to type your new password and then retype that new password
     if (newPassword !== confirmNewPassword) {
       toast.error("New passwords do not match");
       return;
@@ -110,13 +122,18 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
+      // creates a credential variable from the current user with the current password and email
       const credential = EmailAuthProvider.credential(email, currentPassword);
+      // re-authenticates that user with those credentials
       await reauthenticateWithCredential(user, credential);
 
+      // sets the new password
       await updatePassword(user, newPassword);
       setShowPasswordForm(false);
+      // prints it was successful
       toast.success("Password update successfully");
     } catch (error) {
+      // Says there was an error
       toast.error("Failed to update password: " + error.message);
     } finally {
       setLoading(false);

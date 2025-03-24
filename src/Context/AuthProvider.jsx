@@ -1,26 +1,30 @@
 import { createContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-// IMPORT MAY NOT BE NEEDED TO DELETE LATER
+// IMPORT MAY NOT BE NEEDED, DELETE LATER
 import { supabase } from '../utils/supabaseClient';
 // imports to use to get firebase for authentication
 import { auth } from "../utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-// Create the Auth Context
+// Create the Auth Context allowing authentication data to be shared across the app
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Tracks the authenticated user
+  const [user, setUser] = useState(null); // Tracks the authenticated Firebase user
   const [loading, setLoading] = useState(true); // Tracks loading state for auth initialization
 
   useEffect(() => {
     // New section for firebase authentication provided by ChatGPT
+    // A Firebase function that listens for changes in authentication status
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // When the auth state is changed, it will update the current user to the new one logged in
+      // or sets null if logged-out
       setUser(currentUser);
+      // stops the loading indicator
       setLoading(false);
     });
 
-    // cleans up the listener on unmount
+    // cleans up the listener on unmount to prevent memory leaks
     return () => unsubscribe();
   }, []);
 
@@ -48,9 +52,11 @@ const AuthProvider = ({ children }) => {
   //   initAuth();
   // }, []);
 
+  // Returns authentication data 
   return (
+    // this will return and make the variables user and loading available throughout the app
     <AuthContext.Provider value={{ user, loading }}>
-      {loading ? <div>Loading...</div> : children} {/* Display loading state */}
+      {loading ? <div>Loading...</div> : children} {/* Display loading state is loading is true*/}
     </AuthContext.Provider>
   );
 };
