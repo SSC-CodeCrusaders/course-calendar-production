@@ -59,11 +59,13 @@ const Homepage = () => {
         // if there is a user, it will call a method from the firestoreDatabase.js file to get the calendars
         try {
           const schedules = fetchUserCalendars();
+
           // Supabase approach to fetch calendars from their database
           // const schedules = await fetchSchedules(user.id);
+          
           setCalendars(schedules.length > 0 ? schedules : [defaultCalendar]);
         } catch (error) {
-          toast.error("Failed to load schedules from Supabase.");
+          toast.error("Failed to load schedules from Firestore.");
           console.error("Error loading calendars: ", error);
         }
       } else {

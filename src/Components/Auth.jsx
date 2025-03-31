@@ -21,7 +21,7 @@ function Auth() {
   // Handles sign-up logic, sets loading state, and provides feedback via toast notifications
   // This will now handle sign-up logic with Firebase Authentication
   const handleSignUp = async () => {
-    setLoading(true);
+    // setLoading(true);
 
     try {
       // Saves the user credentials when creating a new user
@@ -38,7 +38,8 @@ function Auth() {
       // displays a toast indicating that it was successful in creating a new user
       toast.success("Sign-up successful, please check your email for verification.");
     } catch (error) {
-      toast.error(error.message);
+      // This represents an error if there already exists an email
+      toast.error("Email already in use.");
     }
     
     setLoading(false)
@@ -55,13 +56,15 @@ function Auth() {
 
   // Handles login logic with Firebase Authentication, sets loading state, and provides feedback via toast notifications
   const handleLogin = async () => {
-    setLoading(true);
+    // Commenting the line out below gave me the result of when logging in it kicks me back to the main page
+    // which is the desired effect, not sure why commenting this out does this but it works.  
+    // setLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success("Login Successful!");
     } catch (error) {
-      toast.error(error.message);
+      toast.error("Email or Password does not match - " + error.message);
     }
     setLoading(false)
 
