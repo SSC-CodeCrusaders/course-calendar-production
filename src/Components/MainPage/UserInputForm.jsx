@@ -5,6 +5,8 @@ import { academicCalendar } from "../../utils/academicCalendar";
 import { saveSchedule, updateSchedule } from "../../utils/supabaseClient";
 import { AuthContext } from "../../Context/AuthProvider";
 import ImageUploadProcessor from "./ImageUploadProcessor";
+// Added import for Firestore methods
+import { addCalendar } from "../../utils/firestoreDatabase"
 
 const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
   const { user } = useContext(AuthContext);
@@ -41,8 +43,10 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
           await updateSchedule(currentCalendar.id, scheduleData);
           toast.success("Schedule updated in your account!");
         } else {
-          const savedSchedule = await saveSchedule({ ...scheduleData, user_id: user.id });
-          updateCurrentCalendar("id", savedSchedule[0].id);
+          const savedSchedule = await addCalendar(scheduleData);
+          // Supabase method to save a calendar
+          // const savedSchedule = await saveSchedule({ ...scheduleData, user_id: user.id });
+          // updateCurrentCalendar("id", savedSchedule[0].id);
           toast.success("Schedule saved to your account!");
         }
       } else {
