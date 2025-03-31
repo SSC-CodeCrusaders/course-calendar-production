@@ -3,6 +3,7 @@ import { collection, getDoc, setDoc, addDoc, getDocs } from "firebase/firestore"
 import { db, auth } from "./firebase";
     
 export const addCalendar = async (calendarData) => {
+    await auth.currentUser?.reload();
     const user = auth.currentUser;
     // Checks if there is a user logged in
     if (!user) return;
@@ -24,6 +25,9 @@ export const addCalendar = async (calendarData) => {
 }
 
 export const fetchUserCalendars = async () => {
+    // this will reload Firebase as well as the current user
+    await auth.currentUser?.reload();
+
     // checks if there is a user logged in and if not, so currentUser=Null, it just returns
     if (!auth.currentUser) return
 

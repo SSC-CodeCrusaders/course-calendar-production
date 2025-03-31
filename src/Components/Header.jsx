@@ -12,9 +12,11 @@ import { signOut } from "firebase/auth";
 // Header is a functional component that receives the current user logged in and the function to update the current user
 const Header = ({ user, setUser }) => {
   // userEmail is a local state that stores the user's email
-  const [userEmail, setUserEmail] = useState('');
+  // Creates two useState variables but will give the value of the a signed in user's email if there is one
+  const [userEmail, setUserEmail] = useState(user?.email || '');
   // useEffect for an Authentication listener and runs when the component mounts and listens for authentication state changes
   useEffect(() => {
+    // I AM EDITING USING THIS SECTION BELOW AS A FALLBACK
     // onAuthStateChanged subscirbes to Firebase auth changes
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       // if a user is logged in
@@ -55,6 +57,9 @@ const Header = ({ user, setUser }) => {
       // resets the user and their email to null and an empty string respectively
       setUser(null);
       setUserEmail('');
+      // This will clear the session storage meaning when you sign out it will remove the
+      // Firebase presence from local storage because it likes to persist 
+      sessionStorage.clear();
       // removes locally stored calendar data
       localStorage.removeItem("calendars");
       localStorage.removeItem("currentIndex");
