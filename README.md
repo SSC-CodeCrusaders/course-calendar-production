@@ -125,6 +125,10 @@ Summary:
 - **Email**: joshuambutny@lewisu.edu
 - **Github**: JobuBoju
 
+- **Name**: Benyamin Bamburac
+- **Email**: benyaminfbamburac@lewisu.edu
+- **Github**: bambamboo15
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE)..
