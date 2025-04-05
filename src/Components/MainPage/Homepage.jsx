@@ -53,19 +53,19 @@ const Homepage = () => {
   // Effect to load schedules when user logs in or reset on logout
   useEffect(() => {
     // creates a method that when called will load schedules from Firestore
-    const loadSchedules = async () => {
+    const loadCalendars = async () => {
       // Checks if there is a user signed in
       if (user) {
         // if there is a user, it will call a method from the firestoreDatabase.js file to get the calendars
         try {
-          const schedules = fetchUserCalendars();
+          const calendars = await fetchUserCalendars();
 
           // Supabase approach to fetch calendars from their database
           // const schedules = await fetchSchedules(user.id);
           
-          setCalendars(schedules.length > 0 ? schedules : [defaultCalendar]);
+          setCalendars(calendars && calendars.length > 0 ? calendars : [defaultCalendar]);
         } catch (error) {
-          toast.error("Failed to load schedules from Firestore.");
+          toast.error("Failed to load calendars from Firestore.");
           console.error("Error loading calendars: ", error);
         }
       } else {
@@ -77,7 +77,7 @@ const Homepage = () => {
       }
     };
 
-    loadSchedules();
+    loadCalendars();
   }, [user]);
 
   // Function to create a new calendar
