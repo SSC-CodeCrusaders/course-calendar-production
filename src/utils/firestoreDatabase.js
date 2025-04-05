@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, getDoc, setDoc, addDoc, getDocs } from "firebase/firestore"
+import { collection, getDoc, setDoc, addDoc, getDocs, updateDoc, doc } from "firebase/firestore"
 import { db, auth } from "./firebase";
     
 export const addCalendar = async (calendarData) => {
@@ -51,6 +51,20 @@ export const fetchUserCalendars = async () => {
         console.error("Error fetching calendars: ", error);
     }
 }
+
+export const updateUserCalendar = async (userId, calendarId, updatedData) => {
+    if (!userId || !calendarId) throw new Error("Missing user ID or calendar ID.");
+
+    const userUid = auth.currentUser.uid;
+    const calendarRef = doc(db, "calendars", userUid, "userCalendars", calendarId);
+
+    try {
+        await updateDoc(calendarRef, updatedData);
+    } catch (error) {
+        console.error("Firestore update failed:", error);
+        throw error;
+    }
+};
 
     /* 
     SECTION BELOW WAS CREATED FROM A VIDEO ABOUT HOW TO IMPLEMENT FIRESTORE IN A REACT APP
