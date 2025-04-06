@@ -129,6 +129,10 @@ Summary:
 - **Email**: benyaminfbamburac@lewisu.edu
 - **Github**: bambamboo15
 
+- **Name**: Justin Ajuogu
+- **Email**: justinajuogu@lewisu.edu
+- **Github**: jagit2024
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE)..
