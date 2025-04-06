@@ -129,6 +129,10 @@ Summary:
 - **Email**: benyaminfbamburac@lewisu.edu
 - **Github**: bambamboo15
 
+- **Name**: Aaron Rader
+- **Email**: aaronrader@lewisu.edu
+- **Github**: Aaron-2792
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE)..
