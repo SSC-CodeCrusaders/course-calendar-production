@@ -9,6 +9,7 @@ export const theme = {
       gray: "#d9d9d9",
       black: "#000000",
       lewisRed: "#940731",  // Same color as the MyLewis portal
+      accent: "#310310",
     },
     fontFamily: {
       crimson: ["'Crimson Text'", "serif"],

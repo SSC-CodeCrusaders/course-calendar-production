@@ -1,6 +1,5 @@
 // src/Components/Header.jsx
 import { Link } from "react-router-dom";
-import { supabase } from '../utils/supabaseClient';
 import { useEffect, useState } from 'react';
 import { toast } from "react-toastify";
 import PropTypes from 'prop-types';
@@ -111,7 +110,7 @@ const Header = ({ user, setUser }) => {
   // };
 
   return (
-    <nav className="bg-lewisRedDarkest text-white py-4 relative flex items-center justify-between px-4">
+    <nav className="fixed top-0 left-0 w-full bg-accent text-white py-4 z-50 flex items-center justify-between px-4">
       {/* Application title with link to home */}
       <h1 className="font-crimson text-3xl sm:text-4xl md:text-5xl font-bold hover:text-gray transition">
         <Link to="/">LewisCal</Link>
@@ -123,16 +122,6 @@ const Header = ({ user, setUser }) => {
         <Link className="hover:text-gray transition px-3" to="/faq">FAQs</Link>
         <Link className="hover:text-gray transition px-3" to="/tutorial">Tutorial</Link>
         <Link className="hover:text-gray transition px-3" to="/contactus">Contact Us</Link>
-
-        {/* External Link to old website - will need to be removed later */}
-        <a
-          className="hover:text-gray transition px-3"
-          href="https://lewiscalendar-gpfng4ddezdmhdac.centralus-01.azurewebsites.net/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Info
-        </a>
 
         {!user ? (
         // Display login/signup link if user is not logged in
@@ -148,7 +137,7 @@ const Header = ({ user, setUser }) => {
             {/* Sign Out Button */}
             <button
               onClick={handleSignOut}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-700 transition ml-4"
+              className="bg-red-500 px-3 py-1 rounded text-nowrap hover:bg-red-700 transition ml-4"
             >
               Sign Out
             </button>

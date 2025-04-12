@@ -10,30 +10,11 @@ import TutorialPage from "./Components/Pages/TutorialPage";
 import FeaturesPage from "./Components/Pages/FeaturesPage"
 import FaqPage from "./Components/Pages/faqPage";
 import ContactUsPage from "./Components/Pages/ContactUsPage"
-import { supabase } from "./utils/supabaseClient";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   const [user, setUser] = useState(null);
-
-  // Handle user session persistence and state updates
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user ?? null);
-
-      const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user ?? null);
-      });
-
-      return () => {
-        authListener?.subscription.unsubscribe();
-      };
-    };
-
-    getSession();
-  }, []);
 
   // ProtectedRoute component to restrict access to authenticated users only
   // Redirects to the /auth route if the user is not logged in
@@ -47,33 +28,35 @@ export default function App() {
 
   return (
     <Router>
-      <Header user={user} setUser={setUser} />
-      <Routes>
-        {/* Public Routes */}
-        <Route
-          path="/auth"
-          element={!user ? <Auth /> : <Navigate to="/" replace />}
-        />
-        {/* Homepage Route */}
-        <Route path="/" element={<Homepage />} />
+      <div className="pt-20">
+        <Header user={user} setUser={setUser} />
+        <Routes>
+          {/* Public Routes */}
+          <Route
+            path="/auth"
+            element={!user ? <Auth /> : <Navigate to="/" replace />}
+          />
+          {/* Homepage Route */}
+          <Route path="/" element={<Homepage />} />
 
-        {/* New 1-4 */}
-        <Route path="/aboutus" element={<AboutUsPage/>} />
-        <Route path="/tutorial" element={<TutorialPage/>} />
-        <Route path="/features" element={<FeaturesPage/>} />
-        <Route path="/faq" element={<FaqPage/>} />
-        <Route path="/contactus" element={<ContactUsPage/>} />
-        {/* New 1-4 */}
+          {/* New 1-4 */}
+          <Route path="/aboutus" element={<AboutUsPage/>} />
+          <Route path="/tutorial" element={<TutorialPage/>} />
+          <Route path="/features" element={<FeaturesPage/>} />
+          <Route path="/faq" element={<FaqPage/>} />
+          <Route path="/contactus" element={<ContactUsPage/>} />
+          {/* New 1-4 */}
 
-        {/* Protected Routes */}
-        <Route
-          path="/profile"
-          element={<ProtectedRoute element={<UserProfile />} />}
-        />
+          {/* Protected Routes */}
+          <Route
+            path="/profile"
+            element={<ProtectedRoute element={<UserProfile />} />}
+          />
 
-        {/* Redirect unknown routes to home or a 404 page */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Redirect unknown routes to home or a 404 page */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
       <ToastContainer />
     </Router>
   );
