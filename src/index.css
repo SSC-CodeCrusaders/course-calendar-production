@@ -34,6 +34,10 @@ body {
   /* Secondary color */
 }
 
+.bg-accent {
+  background-color: #310310;
+}
+
 .text-gray {
   color: #d9d9d9;
   /* Gray text */

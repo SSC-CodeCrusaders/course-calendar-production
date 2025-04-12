@@ -1,218 +1,211 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useContext, useEffect } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import UserInputForm from "./UserInputForm";
+import LinkPage from "./LinkPage";
+import { AuthContext } from "../../Context/AuthProvider";
+import { getHolidaysThisMonth, getGreyedOutDates, generateCalendarDays } from "../../utils/calendarUtils";
+import { academicCalendar } from "../../utils/academicCalendar";
 
-const CalendarPage = ({ currentCalendar }) => {
-  const {
-    firstDay,
-    lastDay,
-    daysOfClass,
-    className,
-    location,
-    instructorName,
-    startTime,
-    endTime,
-  } = currentCalendar;
-
-  // Days of the week
-  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-  // Months of the year
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  // State to track the current month and year
+const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }) => {
+  const { user } = useContext(AuthContext);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [expandedDay, setExpandedDay] = useState ({ day: null, month: null, year: null });
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState({
+    monday: new Set(),
+    tuesday: new Set(),
+    wednesday: new Set(),
+    thursday: new Set(),
+    friday: new Set(),
+  });
+  const [selectedTerm, setSelectedTerm] = useState(currentCalendar.academicTerm || "SP2025");
+  const termStart = new Date(academicCalendar[selectedTerm]?.termStart);
+  const termEnd = new Date(academicCalendar[selectedTerm]?.termEnd);
 
-  // Parse firstDay and lastDay into JavaScript Date objects
-  const firstDayDate = new Date(firstDay);
-  const lastDayDate = new Date(lastDay);
+  useEffect(() => {
+    const selectedTimeSlotsObject = {};
+    Object.keys(selectedTimeSlots).forEach((day) => {
+      selectedTimeSlotsObject[day] = Array.from(selectedTimeSlots[day]);
+    });
 
-  // Get the number of days in the current month
+    const newStart = new Date(academicCalendar[selectedTerm]?.termStart);
+    setCurrentMonth(newStart.getMonth());
+    setCurrentYear(newStart.getFullYear());
+
+    const updatedCalendars = calendars.map((calendar, index) =>
+    index === currentIndex
+      ? { ...calendar, selectedTimeSlots: selectedTimeSlotsObject, academicTerm: selectedTerm || "SP2025" }
+      : calendar
+    );
+    setCalendars(updatedCalendars);
+  }, [selectedTimeSlots, selectedTerm]);
+
+  const holidays = academicCalendar[selectedTerm]?.holidays || [];
+
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const changeMonth = (offset) => {
+    setCurrentMonth((prevMonth) => {
+      let newMonth = prevMonth + offset;
+      if (newMonth < 0) {
+        setCurrentYear(currentYear - 1);
+        newMonth = 11;
+      } else if (newMonth > 11) {
+        newMonth = 0;
+        setCurrentYear(currentYear + 1);
+      }
+      return newMonth;
+    });
+  };
+
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-  // Calculate the first day of the month's index (0 = Sunday, 6 = Saturday)
+  const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
   const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
 
-  // Generate the calendar grid
-  const calendarDays = Array.from({ length: firstDayIndex + daysInMonth }, (_, i) =>
-    i >= firstDayIndex ? i - firstDayIndex + 1 : null
-  );
+  const holidaysThisMonth = useMemo(() => getHolidaysThisMonth(holidays, currentMonth, currentYear), [currentMonth, currentYear]);
+  const greyedOutDates = useMemo(() => getGreyedOutDates(currentMonth, currentYear, daysInMonth, holidaysThisMonth), [currentMonth, currentYear, daysInMonth, holidaysThisMonth]);
+  const calendarDays = useMemo(() => generateCalendarDays(firstDayIndex, prevMonthDays, currentYear, currentMonth, daysInMonth, greyedOutDates), 
+    [firstDayIndex, prevMonthDays, currentYear, currentMonth, daysInMonth, greyedOutDates]);
 
-  // Change month handlers
-  const handlePreviousMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear((prev) => prev - 1);
-    } else {
-      setCurrentMonth((prev) => prev - 1);
-    }
+  const mwf = ["8:00AM - 8:50AM", "9:00AM - 9:50AM", "10:00AM - 10:50AM", "11:00AM - 11:50AM", "12:00PM - 12:50PM", "1:00PM - 1:50PM", "2:00PM - 2:50PM", "3:00PM - 3:50PM"];
+  const tr = ["8:00AM - 9:15AM", "9:30AM - 10:45AM", "11:00AM - 12:15PM", "12:30PM - 1:45PM", "2:00PM - 3:15PM", "3:30PM - 4:45PM"];
+  const timeSlots = { monday: mwf, tuesday: tr, wednesday: mwf, thursday: tr, friday: mwf };
+
+  const toggleTimeSlot = (dayOfWeek, slot, event) => {
+    event.stopPropagation();
+    setSelectedTimeSlots((prev) => {
+      const updated = { ...prev };
+      const updatedSlots = new Set(updated[dayOfWeek] || []);
+      if (updatedSlots.has(slot)) {
+        updatedSlots.delete(slot);
+      } else {
+        updatedSlots.add(slot);
+      }
+      if (updatedSlots.size === 0) {
+        delete updated[dayOfWeek];
+      } else {
+        updated[dayOfWeek] = updatedSlots;
+      }
+      return updated;
+    });
   };
-
-  const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear((prev) => prev + 1);
-    } else {
-      setCurrentMonth((prev) => prev + 1);
-    }
-  };
-
-  // Helper function to check if a given day is within the firstDay and lastDay range
-  const isWithinRange = (day) => {
-    if (!day) return false;
-    const currentDate = new Date(currentYear, currentMonth, day);
-    return currentDate >= firstDayDate && currentDate <= lastDayDate;
-  };
-
-  // List of holidays and observances based off of LewisU academic calendar
-  const holidays = [
-    //Fall 2024
-    {date: '2024-08-26', name: 'Full Day of Classes for the 16-Week and First 8-Week Session'},
-    {date: '2024-09-02', name: 'Labor Day: No Classes'},
-    {startDate: '2024-10-10', endDate: '2024-10-11', name: 'Fall Break: No classes for 16-Week Courses'},
-    {date: '2024-10-19', name: 'Last Day of Classes for First 8-Week Session'},
-    {date: '2024-10-21', name: 'Beginning of Second 8-Week Session'},
-    {date: '2024-11-27', name: 'Thanksgiving Holiday Recess Begins: No Classes'},
-    {date: '2024-12-02', name: 'Classes Resume'},
-    {date: '2024-12-07', name: 'Final Day of Classes for 16-Week Term'},
-    {startDate: '2024-12-09', endDate: '2024-12-14', name: 'Final Exams'},
-    {startDate: '2024-12-13', endDate: '2024-12-14', name: 'Commencement Weekend'},
-    {date: '2024-12-14', name: 'Final Day of Second 8-Week Session'},
-    {date: '2024-12-20', name: 'Fall Term Degree Conferral Date'},
-    //Spring 2025
-    {startDate: '2025-01-06', endDate: '2025-01-17', name: 'January Term'},
-    {date: '2025-01-20', name: 'Birthday of Martin Luther King Jr.'},
-    {date: '2025-01-21', name: 'Full Day of Classes for the 16-Week Term and First 8-Week Session'},
-    {date: '2025-03-15', name: 'Last Day of Classes for First 8-Week Session'},
-    {startDate: '2025-03-17', endDate: '2025-03-22', name: 'Spring Break: No Classes'},
-    {date: '2025-03-24', name: 'Classes Resume for 16-Week Term and Start Second 8-Week Session'},
-    {startDate: '2025-04-17', endDate:'2025-04-21', name: 'Easter Holiday Recess: No Classes'},
-    {date: '2025-05-10', name: 'Final Day of Classes for 16-Week Term'},
-    {startDate: '2025-05-12', endDate: '2025-05-17', name: 'Final Exams for 16-Week Term'},
-    {date: '2025-05-17', name: 'Last Day of Classes for the Second 8-Week Session'},
-    {startDate: '2025-05-16', endDate: '2025-05-17', name: 'Commencement Weekend'},
-    {date: '2025-05-23', name: 'Spring Term Degree Conferral Date'},
-    //Summer 2025
-    {date: '2025-05-19', name: 'Start First 7-Week Session'},
-    {date: '2025-05-19', name: 'Standard 4-Week Session (dates may vary, standard end date June 15)'},
-    {date: '2025-05-19', name: 'Standard 10-Week Session (dates may vary, standard end date July 19)'},
-    {date: '2025-05-19', name: 'Start Standard 14-Week Session'},
-    {date: '2025-06-02', name: 'Standard 6-Week Session (dates may vary, standard end July 13)'},
-    {date: '2025-06-02', name: 'Standard 8-Week Session (dates may vary, standard end July 26)'},
-    {date:'2025-06-19', name: 'Juneteenth Observed: No Classes'},
-    {startDate: '2025-07-03', endDate: '2025-07-04', name: 'Independence Day Holiday: No Classes'},
-    {date: '2025-07-05', name: 'End First 7-Week Session'},
-    {date: '2025-07-07', name: 'Start Second 7-Week Session'},
-    {date: '2025-08-23', name: 'End of 14-Week Term and Second 7-Week Term'},
-    {date: '2025-08-29', name: 'Summer Term Degree Conferral Date'},
-  ];
-
-  // Filter holidays and observances that fall within the current month
-  const holidaysThisMonth = holidays.filter((holiday) => {
-    if (holiday.date) {
-      // Single-day holiday/observance
-      const holidayDate = new Date(holiday.date);
-      return (
-        holidayDate.getMonth() === currentMonth &&
-        holidayDate.getFullYear() === currentYear
-      );
-    } else if (holiday.startDate && holiday.endDate) {
-      // Multi-day holiday/observance
-      const start = new Date(holiday.startDate);
-      const end = new Date(holiday.endDate);
-      return (
-        (start.getMonth() === currentMonth && start.getFullYear() === currentYear) ||
-        (end.getMonth() === currentMonth && end.getFullYear() === currentYear)
-      );
-    }
-    return false;
-  });
 
   return (
-    <div className="flex flex-col bg-lewisRed text-white rounded-lg p-6">
-      {/* Calendar Navigation */}
+    <div className="flex flex-col bg-white text-black rounded-lg p-6 w-full max-w-7xl mx-auto min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <button onClick={handlePreviousMonth} className="p-2">
-          <ChevronLeftIcon className="h-6 w-6 text-white" />
+        <button 
+          onClick={() => changeMonth(-1)} 
+          className="p-2 disabled:opacity-20"
+          disabled={new Date(currentYear, currentMonth - 1, 1) < new Date(termStart.getFullYear(), termStart.getMonth(), 1)}
+        >
+          <ChevronLeftIcon className="h-6 w-6 text-black" />
         </button>
-        <h2 className="text-2xl font-bold">
-          {months[currentMonth]} {currentYear}
-        </h2>
-        <button onClick={handleNextMonth} className="p-2">
-          <ChevronRightIcon className="h-6 w-6 text-white" />
+        <div className="flex flex-row gap-4">
+          <select
+            value={selectedTerm}
+            onChange={(e) => setSelectedTerm(e.target.value)}
+            className="p-2 font-semibold border rounded text-sm"
+          >
+            {Object.keys(academicCalendar).map((termKey) => (
+              <option key={termKey} value={termKey}>{termKey}</option>
+            ))}
+          </select>
+          <h2 className="text-2xl text-black font-bold">{months[currentMonth]}</h2>
+        </div>
+        <button 
+          onClick={() => changeMonth(1)} 
+          className="p-2 disabled:opacity-20"
+          disabled={new Date(currentYear, currentMonth + 1, 1) > new Date(termEnd.getFullYear(), termEnd.getMonth(), 1)}
+        >
+          <ChevronRightIcon className="h-6 w-6 text-black" />
         </button>
       </div>
 
-      {/* Days of the Week Header */}
-      <div className="grid grid-cols-7 text-center font-semibold bg-white text-lewisRed rounded-lg p-2 mb-4">
+      <div className="grid grid-cols-7 text-center font-semibold bg-lewisRedDarker text-white rounded-t-lg p-2">
         {daysOfWeek.map((day) => (
-          <div key={day} className="py-1">
-            {day}
-          </div>
+          <div key={day} className="py-2 px-3">{day.slice(0, 3)}</div>
         ))}
       </div>
 
-      {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-2">
-        {calendarDays.map((day, index) => {
-          const dayOfWeek = daysOfWeek[index % 7].toLowerCase();
-          const isClassDay = day && daysOfClass[dayOfWeek];
-          const inRange = isWithinRange(day);
-
+      <div className="grid grid-cols-7">
+        {calendarDays.map((dayObj, index) => {
+          const { day, isPrevMonth, isNextMonth } = dayObj;
+          const date = new Date(dayObj.year, dayObj.month, dayObj.day);
+          const dayOfWeek = daysOfWeek[date.getDay()].toLowerCase();
+          const isCurrentMonth = !isPrevMonth && !isNextMonth;
+          const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+          const isHoliday = isCurrentMonth && greyedOutDates.has(day);
+          const isBeforeTerm = date < termStart;
+          const isAfterTerm = date > termEnd;
+          const isGreyedOut = isWeekend || isHoliday || isBeforeTerm || isAfterTerm;
+          const isExpanded = expandedDay.day === dayObj.day && 
+            expandedDay.month === dayObj.month &&
+            expandedDay.year === dayObj.year;
+          const isSelectedDay = !dayObj.isGreyedOut && 
+            !dayObj.isPrevMonth && 
+            !dayObj.isNextMonth && 
+            selectedTimeSlots[dayOfWeek]?.size > 0;
           return (
-            <div
-              key={index}
-              className={`border rounded-lg p-4 text-center text-sm ${
-                day && inRange
-                  ? isClassDay
-                    ? "bg-white text-lewisRed border-white"
-                    : "bg-lewisRed text-white border-white"
-                  : "bg-transparent"
+            <div 
+              key={index} 
+              className={`p-2 border text-center text-sm cursor-pointer ${
+                isGreyedOut 
+                ? 'bg-gray text-slate-500 cursor-not-allowed' 
+                : isSelectedDay
+                  ? 'bg-lewisRed text-white cursor-pointer' 
+                  : 'bg-white cursor-pointer'
               }`}
+              onClick={() => {
+                if (!isGreyedOut && timeSlots[dayOfWeek]) {
+                  setExpandedDay(
+                    isExpanded 
+                      ? { day: null, month: null, year: null } 
+                      : { day, month: dayObj.month, year: dayObj.year }
+                  );
+                }
+              }}
             >
-              {day && (
-                <>
-                  <div className="text-lg font-bold mb-1">{day}</div>
-                  {day && inRange && isClassDay ? (
-                    <div className="text-xs">
-                      <p>{startTime} - {endTime}</p>
-                      <p>{className}</p>
-                    </div>
-                  ) : (
-                    <div className="text-xs">{inRange ? "No events" : ""}</div>
-                  )}
-                </>
-              )}
+              <div className="text-lg font-bold mb-1">{day}</div>
+              {isExpanded && timeSlots[dayOfWeek] && timeSlots[dayOfWeek].map((slot, idx) => {
+                const isSelected = selectedTimeSlots[dayOfWeek]?.has(slot);
+                return (
+                  <div
+                    key={idx}
+                    onClick={(e) => toggleTimeSlot(dayOfWeek, slot, e)}
+                    className={`text-xs px-3 py-1 my-1 transition duration-150 ease-in-out cursor-pointer 
+                      ${isSelected ? 'bg-green-300' : ''}`}
+                  >
+                    {slot}
+                  </div>
+                );
+              })}
             </div>
           );
         })}
       </div>
-      {/* Holidays Section */}
+
       <div className="mt-6">
-        <h3 className="text-xl font-semibold text-white mb-2"> Holidays and Observances</h3>
-        <ul className="list-disc pl-5 text-white">
-          {holidaysThisMonth.map((holiday) => (
-            <li key={holiday.date || holiday.startDate}>
-              <span className="font-bold">{holiday.name}</span> - {' '}
-              {holiday.date
-              ? new Date(holiday.date).toLocaleDateString()
-              : `${new Date(holiday.startDate).toLocaleDateString()} to ${new Date(holiday.endDate).toLocaleDateString()}`}
+        <h3 className="text-xl font-semibold text-black mb-2">Holidays and Observances</h3>
+        <ul className="list-disc pl-5 text-black">
+          {holidaysThisMonth.map((holiday, index) => (
+            <li key={index}>
+              <span className="font-bold">{holiday.name}</span> - {holiday.date || `${holiday.startDate} to ${holiday.endDate}`}
             </li>
           ))}
         </ul>
+      </div>
+      
+      <div className="bg-white p-4 rounded-lg">
+        <UserInputForm
+          currentIndex={currentIndex}
+          calendars={calendars}
+          setCalendars={setCalendars}
+        />
+      </div>
+
+      <div className="bg-white p-4 rounded-lg">
+        <LinkPage currentCalendar={currentCalendar} />
       </div>
     </div>
   );
