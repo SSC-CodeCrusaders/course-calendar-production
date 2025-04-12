@@ -1,11 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import Sidebar from "./Sidebar";
-import UserInputForm from "./UserInputForm";
 import CalendarPage from "./CalendarPage";
-import LinkPage from "./LinkPage";
-import ProgressBar from "./ProgressBar";
 import { AuthContext } from "../../Context/AuthProvider";
-import { fetchSchedules } from "../../utils/supabaseClient";
 import { fetchUserCalendars } from "../../utils/firestoreDatabase"
 // imports added to use Firestore
 
@@ -31,7 +27,6 @@ const Homepage = () => {
     className: "",
     location: "",
     notes: "",
-    page: 0,
   };
 
   const [calendars, setCalendars] = useState(() => {
@@ -43,6 +38,8 @@ const Homepage = () => {
     const storedIndex = localStorage.getItem("currentIndex");
     return storedIndex ? parseInt(storedIndex, 10) : 0;
   });
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Effect to sync calendars and currentIndex with localStorage
   useEffect(() => {
@@ -86,15 +83,6 @@ const Homepage = () => {
     setCurrentIndex(calendars.length); // Set the new calendar as active
   };
 
-  // Function to set the current page for a calendar
-  const setCurrentPage = (page) => {
-    setCalendars((prevCalendars) => {
-      const updatedCalendars = [...prevCalendars];
-      updatedCalendars[currentIndex].page = page;
-      return updatedCalendars;
-    });
-  };
-
   const updateCalendarName = (index, newName) => {
     setCalendars((prevCalendars) =>
       prevCalendars.map((calendar, i) =>
@@ -112,22 +100,15 @@ const Homepage = () => {
     switch (page) {
       case 0: // User Input
         return (
-          // calls the userInputForm passing through the currentIndex of the calendar
-          // the calendars object holding all of the data important for calendars
-          // and the method setCalendars created from the useState() to change the calendars
-          <UserInputForm
+          <CalendarPage
+            currentCalendar={currentCalendar}
             currentIndex={currentIndex}
             calendars={calendars}
             setCalendars={setCalendars}
           />
         );
-      case 1: // Calendar Page
-        return <CalendarPage currentCalendar={currentCalendar} />;
-      case 2: // Link Page
-        return <LinkPage currentCalendar={currentCalendar} />;
-      default: // Fallback to User Input
-        setCurrentPage(0); // Automatically reset invalid page
-        return null; // Render nothing temporarily (until page resets)
+      default:
+        return null;
     }
   };
 
@@ -140,15 +121,14 @@ const Homepage = () => {
         setCurrentIndex={setCurrentIndex}
         createNewCalendar={createNewCalendar}
         updateCalendarName={updateCalendarName}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
       />
+
       {/* Main Content */}
-      <div className="flex flex-col flex-grow p-4 overflow-y-auto">
-        {/* Progress Bar */}
-        <ProgressBar
-          currentPage={calendars[currentIndex]?.page || 0}
-          setCurrentPage={setCurrentPage}
-        />
-        {/* Page Content */}
+      <div className={`flex flex-col flex-grow p-4 overflow-y-auto transition-all duration-150
+                      ${isCollapsed ? "ml-12" : "ml-44"}`}>
+        {/* Render Active Page Content */}
         <div className="flex-grow">{renderCurrentPage()}</div>
       </div>
     </div>
