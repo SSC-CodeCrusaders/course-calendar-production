@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 // AuthService.js
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -43,15 +42,6 @@ function Auth() {
     }
     
     setLoading(false)
-
-    // SECTION BELOW MAY NOT BE NEEDED
-    // const { error } = await supabase.auth.signUp({ email, password });
-    // if (error) {
-    //   toast.error(error.message);
-    // } else {
-    //   toast.success('Sign-up successful, please check your email for verification.');
-    // }
-    // setLoading(false); 
   };
 
   // Handles login logic with Firebase Authentication, sets loading state, and provides feedback via toast notifications
@@ -68,14 +58,6 @@ function Auth() {
     }
     setLoading(false)
 
-    // SECTION BELOW MAY NOT BE NEEDED DUE TO USING SUPABASE
-    // const { error } = await supabase.auth.signInWithPassword({ email, password });
-    // if (error) {
-    //   toast.error(error.message);
-    // } else {
-    //   toast.success('Login successful!'); 
-    // }
-    // setLoading(false); 
   };
 
   return (

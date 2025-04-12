@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { useState } from "react";
+import { CalendarIcon } from "@heroicons/react/24/solid";
 
-const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar, updateCalendarName }) => {
+const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar, updateCalendarName, isCollapsed, setIsCollapsed }) => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [tempName, setTempName] = useState("");
 
@@ -26,54 +27,61 @@ const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar, 
   };
 
   return (
-    <aside className="w-64 bg-lewisRedDarker p-5 text-white flex flex-col">
-      <h2 className="text-xl font-semibold mb-6">Your Calendars</h2>
-      <div className="flex flex-col gap-4 flex-grow">
+    <aside className={`fixed left-0 h-[calc(100vh-80px)] bg-lewisRedDarker text-white flex flex-col
+      transition-all duration-200 ${ isCollapsed ? "w-12" : "w-58" }`}>
+      
+      {/* Sidebar Title */}
+      <div className="bg-accent flex justify-center">
+        <CalendarIcon className="w-7 h-7"/>
+        <h2 className={`flex text-xl font-semibold transition-all duration-200 ${isCollapsed ? "hidden" : "block"}`}>
+          Your Calendars
+        </h2>
+      </div>
+
+      {/* Create New Calendar Button */}
+      <div className="font-semibold">
+        <button onClick={createNewCalendar} className="w-full py-1 bg-accent transition text-white">
+          {isCollapsed ? "+" : "+ Create Calendar"}
+        </button>
+      </div>
+
+      {/* Calendar List */}
+      <div className="flex flex-col flex-grow">
         {calendars.map((calendar, index) => (
           <div
             key={index}
-            className={`relative w-full text-left p-2 rounded transition duration-200 ease-in-out ${currentIndex === index ? "bg-gray-600" : "bg-gray-700 hover:bg-gray-600"
-              }`}
+            className={`flex p-2 items-center gap-2 transition duration-200 cursor-pointer
+              ${currentIndex === index ? "bg-lewisRed" : "bg-white hover:bg-lewisRed"}`}
+            onClick={() => setCurrentIndex(index)}
+            onDoubleClick={() => handleNameEdit(index, calendar.className)}
+            style={{ height: "40px" }}
           >
-            {editingIndex === index ? (
-              <div>
-                <label
-                  htmlFor={`calendar-input-${index}`}
-                  className="block mb-2 text-sm font-medium text-white"
-                >
-                  Edit Calendar Name
-                </label>
+            {!isCollapsed && (
+              editingIndex === index ? (
                 <input
                   type="text"
-                  id={`calendar-input-${index}`}
                   value={tempName}
                   onChange={(e) => setTempName(e.target.value)}
                   onBlur={() => handleBlur(index)}
                   onKeyDown={(e) => handleKeyPress(e, index)}
                   autoFocus
-                  style={{ color: 'black' }}
-                  className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs"
+                  className="bg-gray-50 text-black p-2 w-full text-sm"
                 />
-              </div>
-            ) : (
-              <button
-                className="w-full text-left"
-                onClick={() => setCurrentIndex(index)}
-                onDoubleClick={() => handleNameEdit(index, calendar.className)}
-              >
-                {calendar.className || `Calendar ${index + 1}`}
-              </button>
+              ) : (
+                <span>{calendar.className || `Calendar ${index + 1}`}</span>
+              )
             )}
           </div>
         ))}
       </div>
-      <button
-        className="mt-6 bg-green-600 hover:bg-green-500 text-white p-2 w-full rounded transition duration-200"
-        onClick={createNewCalendar}
+
+      {/* Sidebar Toggle */}
+      <button onClick={() => setIsCollapsed(!isCollapsed)}
+        className="text-white py-2 bg-accent transition w-full"
       >
-        + Create Calendar
+        {isCollapsed ? "▶" : "◀"}
       </button>
-    </aside >
+    </aside>
   );
 };
 
@@ -83,6 +91,8 @@ Sidebar.propTypes = {
   setCurrentIndex: PropTypes.func.isRequired,
   createNewCalendar: PropTypes.func.isRequired,
   updateCalendarName: PropTypes.func.isRequired,
+  isCollapsed: PropTypes.bool.isRequired,
+  setIsCollapsed: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 import { FiUser, FiMail, FiKey, FiEdit2 } from 'react-icons/fi';
 import { auth } from '../utils/firebase';

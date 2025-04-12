@@ -1,11 +1,8 @@
 import { createContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-// IMPORT MAY NOT BE NEEDED, DELETE LATER
-import { supabase } from '../utils/supabaseClient';
 // imports to use to get firebase for authentication
 import { auth } from "../utils/firebase";
-import { onAuthStateChanged, getAuth, setPersistence, browserSessionPersistence, signOut } from "firebase/auth";
-import { SiNgrok } from 'react-icons/si';
+import { onAuthStateChanged, getAuth, setPersistence, browserLocalPersistence, signOut } from "firebase/auth";
 
 // Create the Auth Context allowing authentication data to be shared across the app
 export const AuthContext = createContext();
@@ -18,12 +15,11 @@ const AuthProvider = ({ children }) => {
   const auth = getAuth();
 
   useEffect(() => {
-
-    setPersistence(auth, browserSessionPersistence)
+    setPersistence(auth, browserLocalPersistence)
     .then(() => {
       console.log("Firebase persistence set to session-based.");
     })
-    .catch((eror) => {
+    .catch((error) => {
       console.error("Error setting auth persistence: ", error);
     });
 
@@ -32,53 +28,14 @@ const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       // When the auth state is changed, it will update the current user to the new one logged in
       // or sets null if logged-out
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
+      setUser(user || null);
       // stops the loading indicator
       setLoading(false);
     });
 
-    const handleWindowClose = () => {
-      SiNgrok(auth).then(() => {
-        console.log("user logged out due to full browser close.");
-      });
-    };
-
-    window.addEventListener("unload", handleWindowClose);
-
     // cleans up the listener on unmount to prevent memory leaks
-    return () => {
-      unsubscribe();
-      window.removeEventListener("unload", handleWindowClose);
-    }
+    return () => unsubscribe();
   }, []);
-
-  // REVIEW SECTION BELOW, MAY NOT BE NEEDED
-  //   const initAuth = async () => {
-  //     // Fetch the session from Supabase
-  //     const { data, error } = await supabase.auth.getSession();
-
-  //     if (error) {
-  //       console.error('Failed to fetch session:', error.message);
-  //     } else {
-  //       setUser(data.session?.user || null); // Set user if session exists
-  //     }
-
-  //     setLoading(false); // Finished initializing auth
-
-  //     // Listen for authentication state changes
-  //     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-  //       setUser(session?.user || null);
-  //     });
-
-  //     return () => subscription?.unsubscribe(); // Clean up listener on unmount
-  //   };
-
-  //   initAuth();
-  // }, []);
 
   // Returns authentication data 
   return (
