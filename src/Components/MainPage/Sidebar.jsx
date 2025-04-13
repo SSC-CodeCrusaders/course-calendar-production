@@ -51,7 +51,7 @@ const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar, 
           <div
             key={index}
             className={`flex p-2 items-center gap-2 transition duration-200 cursor-pointer
-              ${currentIndex === index ? "bg-lewisRed" : "bg-white hover:bg-lewisRed"}`}
+              ${currentIndex === index ? "bg-lewisRed" : "bg-lewisRedDarker"}`}
             onClick={() => setCurrentIndex(index)}
             onDoubleClick={() => handleNameEdit(index, calendar.className)}
             style={{ height: "40px" }}

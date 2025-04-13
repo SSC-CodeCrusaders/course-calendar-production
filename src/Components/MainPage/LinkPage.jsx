@@ -78,7 +78,7 @@ const LinkPage = ({ currentCalendar }) => {
         downloadLink.click();
         document.body.removeChild(downloadLink);
 
-        URL.revokeObjectURL(icsURL);
+        URL.revokeObjectURL(icsUrl);
 
         toast.success("ICS file downloaded successfully.")
         setLoading(false);
