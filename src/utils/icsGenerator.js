@@ -64,7 +64,7 @@ export async function generateICSAndUpload(scheduleEvents, holidays, calendarNam
         await uploadBytes(fileRef, blob);
         const url = await getDownloadURL(fileRef);
         resolve(url);
-        console.log("Generated Public URL:", data);
+        console.log("Generated Public URL:", url);
       } catch (err) {
         console.error("Unexpected error during ICS upload process:", err);
         reject(err);

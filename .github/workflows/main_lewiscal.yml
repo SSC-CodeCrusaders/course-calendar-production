@@ -75,5 +75,5 @@ jobs:
         with:
           app-name: 'lewiscal'
           slot-name: 'Production'
-          package: ./dist
+          package: .
           
