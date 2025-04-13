@@ -92,7 +92,9 @@ const Homepage = () => {
   };
   
   const renderCurrentPage = () => {
-    const currentCalendar = calendars[currentIndex];
+    const safeIndex = currentIndex >= 0 && currentIndex < calendars.length ? currentIndex : 0;
+    const currentCalendar = calendars?.[safeIndex];
+    if (!currentCalendar) return null;
 
     // Ensure a valid page is always set
     const page = currentCalendar.page ?? 0;

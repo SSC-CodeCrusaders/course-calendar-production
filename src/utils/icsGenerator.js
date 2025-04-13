@@ -46,7 +46,6 @@ export async function generateICSAndUpload(scheduleEvents, holidays, calendarNam
   holidays.forEach((holiday) => {
     const isNoClasses = holiday.name?.toLowerCase().includes("no classes");
     if (isNoClasses) return;
-    events.push({ /* ... */ });
   });
 
   return new Promise((resolve, reject) => {

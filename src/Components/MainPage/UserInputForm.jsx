@@ -10,9 +10,12 @@ import { addCalendar, updateUserCalendar } from "../../utils/firestoreDatabase"
 
 const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
   const { user } = useContext(AuthContext);
-  const currentCalendar = calendars[currentIndex];
+  const currentCalendar = calendars?.[currentIndex] ?? {};
+  
   const [notes, setNotes] = useState(currentCalendar.notes || "");
-
+  if (!currentCalendar) {
+    return <div className="text-center text-gray-500 mt-4">No calendar selected.</div>;
+  }
   useEffect(() => {
     const updatedCalendars = calendars.map((calendar, index) =>
       index === currentIndex ? { ...calendar, notes } : calendar
@@ -105,7 +108,7 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
             <input 
               type="text" 
               placeholder="Instructor Name" 
-              value={currentCalendar.instructorName}
+              value={currentCalendar.instructorName || ""}
               onChange={(e) => {
                 const updated = [...calendars];
                 updated[currentIndex].instructorName = e.target.value;
@@ -116,7 +119,7 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
             <input 
               type="text" 
               placeholder="Location" 
-              value={currentCalendar.location}
+              value={currentCalendar.location || ""}
               onChange={(e) => {
                 const updated = [...calendars];
                 updated[currentIndex].location = e.target.value;
