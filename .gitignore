@@ -23,6 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+cors.json
 
 # Ignore workflow files
 main_lewiscal.yml
