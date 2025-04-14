@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, getDoc, setDoc, addDoc, getDocs, updateDoc, doc } from "firebase/firestore"
+import { collection, getDoc, setDoc, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore"
 import { db, auth } from "./firebase";
     
 export const addCalendar = async (calendarData) => {
@@ -63,6 +63,20 @@ export const updateUserCalendar = async (userId, calendarId, updatedData) => {
     } catch (error) {
         console.error("Firestore update failed:", error);
         throw error;
+    }
+}
+
+export const deleteCalendar = async (calendarId) => {
+    await auth.currentUser?.reload();
+    const user = auth.currentUser;
+    if (!user || !calendarId) return;
+
+    try {
+        const docRef = doc(db, "calendars", user.uid, "userCalendars", calendarId);
+        await deleteDoc(docRef);
+        console.log(`Calendar ${calendarId} deleted successfully.`);
+    } catch (error) {
+        console.error("Error deleting calendar: ", error);
     }
 };
 

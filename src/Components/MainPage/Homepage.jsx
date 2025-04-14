@@ -3,6 +3,8 @@ import Sidebar from "./Sidebar";
 import CalendarPage from "./CalendarPage";
 import { AuthContext } from "../../Context/AuthProvider";
 import { fetchUserCalendars } from "../../utils/firestoreDatabase"
+import { deleteCalendar } from "../../utils/firestoreDatabase";
+import { toast } from "react-toastify";
 // imports added to use Firestore
 
 const Homepage = () => {
@@ -90,6 +92,29 @@ const Homepage = () => {
       )
     );
   };
+
+  const handleDeleteCalendar = async (calendarId) => {
+    if (calendars.length === 1) {
+      toast.error("Calendar deletion failed. Cannot delete last calendar.");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Delete Calendar?");
+    if (!confirmDelete) return;
+    const deletedIndex = calendars.findIndex((c) => c.id === calendarId);
+    await deleteCalendar(calendarId);
+    const updatedCalendars = calendars.filter((c) => c.id !== calendarId);
+    setCalendars(updatedCalendars);
+
+    if (deletedIndex === currentIndex) {
+      const nextIndex = deletedIndex >= updatedCalendars.length ? updatedCalendars.length - 1 : deletedIndex;
+      setCurrentIndex(nextIndex);
+    } else if (deletedIndex < currentIndex) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+
+    toast.success("Calendar deleted successfully.");
+  };
   
   const renderCurrentPage = () => {
     const safeIndex = currentIndex >= 0 && currentIndex < calendars.length ? currentIndex : 0;
@@ -125,6 +150,7 @@ const Homepage = () => {
         updateCalendarName={updateCalendarName}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
+        deleteCalendar={handleDeleteCalendar}
       />
 
       {/* Main Content */}
