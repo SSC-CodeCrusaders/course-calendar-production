@@ -2,7 +2,17 @@ import PropTypes from 'prop-types';
 import React, { useState } from "react";
 import { CalendarIcon } from "@heroicons/react/24/solid";
 
-const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar, updateCalendarName, isCollapsed, setIsCollapsed }) => {
+const Sidebar = ({ 
+  calendars, 
+  currentIndex, 
+  setCurrentIndex, 
+  createNewCalendar, 
+  updateCalendarName, 
+  isCollapsed, 
+  setIsCollapsed, 
+  deleteCalendar
+}) => {
+
   const [editingIndex, setEditingIndex] = useState(null);
   const [tempName, setTempName] = useState("");
 
@@ -56,8 +66,13 @@ const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar, 
             onDoubleClick={() => handleNameEdit(index, calendar.className)}
             style={{ height: "40px" }}
           >
-            {!isCollapsed && (
-              editingIndex === index ? (
+            {isCollapsed ? (
+              <div
+                className={`w-2.5 h-2.5 rounded-full mx-auto 
+                  ${currentIndex === index ? "bg-white" : "bg-gray"
+                }`}
+              ></div>
+            ) : editingIndex === index ? (
                 <input
                   type="text"
                   value={tempName}
@@ -68,8 +83,18 @@ const Sidebar = ({ calendars, currentIndex, setCurrentIndex, createNewCalendar, 
                   className="bg-gray-50 text-black p-2 w-full text-sm"
                 />
               ) : (
-                <span>{calendar.className || `Calendar ${index + 1}`}</span>
-              )
+                <span className="flex justify-between w-full items-center">
+                  {calendar.className || `Calendar ${index + 1}`}
+                  <button
+                    className="ml-2 text-sm text-gray hover:text-white transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteCalendar(calendar.id);
+                    }}
+                  >
+                    🗙
+                  </button>
+                </span>
             )}
           </div>
         ))}
@@ -93,6 +118,7 @@ Sidebar.propTypes = {
   updateCalendarName: PropTypes.func.isRequired,
   isCollapsed: PropTypes.bool.isRequired,
   setIsCollapsed: PropTypes.func.isRequired,
+  deleteCalendar: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

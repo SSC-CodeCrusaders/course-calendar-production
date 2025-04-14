@@ -1,6 +1,7 @@
 // src/Components/Header.jsx
 import { Link } from "react-router-dom";
 import { useEffect, useState } from 'react';
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import PropTypes from 'prop-types';
 import { auth, db } from "../utils/firebase";
@@ -68,81 +69,55 @@ const Header = ({ user, setUser }) => {
     }
   };
 
-  // SECTION BELOW USES SUPABASE, MIGHT REMOVE IN THE FUTURE
-  // useEffect(() => {
-  //   const getSession = async () => {
-  //     // Fetch the current user session from Supabase
-  //     const { data } = await supabase.auth.getSession();
-
-  //     // Update user state with session data if available, otherwise set to null
-  //     setUser(data.session?.user ?? null);
-  //   };
-
-  //   getSession(); // Invoke session retrieval on mount
-
-  //   // Set up a listener to detect authentication state changes
-  //   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-  //     setUser(session?.user ?? null); // Update user state accordingly
-  //   });
-
-  //   return () => {
-  //     // Cleanup function to unsubscribe from auth state changes
-  //     authListener?.subscription.unsubscribe();
-  //   };
-  // }, [setUser]);
-
-  // const handleSignOut = async () => {
-  //   const { error } = await supabase.auth.signOut();
-  //   if (error) {
-  //     // Display error message if sign-out fails
-  //     toast.error("Failed to log out: " + error.message);
-  //   } else {
-  //     // Clear user state on successful sign-out
-  //     setUser(null);
-
-  //     // Remove stored calendar data from localStorage
-  //     localStorage.removeItem("calendars");
-  //     localStorage.removeItem("currentIndex");
-
-  //     // Notify user of successful logout
-  //     toast.success("Logged out successfully!");
-  //   }
-  // };
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-accent text-white py-4 z-50 flex items-center justify-between px-4">
-      {/* Application title with link to home */}
-      <h1 className="font-crimson text-3xl sm:text-4xl md:text-5xl font-bold hover:text-gray transition">
-        <Link to="/">LewisCal</Link>
-      </h1>
+    <nav className="fixed top-0 left-0 w-full bg-accent text-white py-4 z-50 px-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+        {/* Application title with link to home */}
+        <h1 className="font-crimson text-5xl font-bold hover:text-gray transition whitespace-nowrap">
+          <Link to="/">LewisCal</Link>
+        </h1>
 
-      <div className="flex">
-        <Link className="hover:text-gray transition px-3" to="/aboutus">About Us</Link>
-        <Link className="hover:text-gray transition px-3" to="/features">Features</Link>
-        <Link className="hover:text-gray transition px-3" to="/faq">FAQs</Link>
-        <Link className="hover:text-gray transition px-3" to="/tutorial">Tutorial</Link>
-        <Link className="hover:text-gray transition px-3" to="/contactus">Contact Us</Link>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm mt-2 sm:mt-0">
+          <Link className="hover:text-gray transition px-3" to="/aboutus">About Us</Link>
+          <Link className="hover:text-gray transition px-3" to="/features">Features</Link>
+          <Link className="hover:text-gray transition px-3" to="/faq">FAQs</Link>
+          <Link className="hover:text-gray transition px-3" to="/tutorial">Tutorial</Link>
+          <Link className="hover:text-gray transition px-3" to="/contactus">Contact Us</Link>
 
-        {!user ? (
-        // Display login/signup link if user is not logged in
-        <Link className="hover:text-gray transition px-3" to="/auth">Log In / Sign Up</Link>
-        ) : (
-          <>
-            {/* Display user email and greeting */}
-            <span className="text-sm px-3">Welcome, {userEmail}</span>
-                  
-            {/* Profile link for logged-in users */}
-            <Link className="hover:text-gray transition ml-4" to="/profile">Profile</Link>
+          {!user ? (
+          // Display login/signup link if user is not logged in
+          <Link className="hover:text-gray transition px-3" to="/auth">Log In / Sign Up</Link>
+          ) : (
+            <div className="relative">
+              <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-1 hover:text-gray transition">
+                <UserCircleIcon className="w-7 h-7 text-white" />
+              </button>
 
-            {/* Sign Out Button */}
-            <button
-              onClick={handleSignOut}
-              className="bg-red-500 px-3 py-1 rounded text-nowrap hover:bg-red-700 transition ml-4"
-            >
-              Sign Out
-            </button>
-          </>
-        )}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white text-black shadow-lg rounded-md z-50">
+                  <Link
+                    to="/profile"
+                    onClick={() => setDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <span className="font-semibold">{userEmail}</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600"
+                  >
+                    Sign Out
+                  </button>
+                </div> 
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );
