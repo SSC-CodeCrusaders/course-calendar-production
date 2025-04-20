@@ -57,47 +57,52 @@ const Sidebar = ({
 
       {/* Calendar List */}
       <div className="flex flex-col flex-grow">
-        {calendars.map((calendar, index) => (
-          <div
-            key={index}
-            className={`flex p-2 items-center gap-2 transition duration-200 cursor-pointer
-              ${currentIndex === index ? "bg-lewisRed" : "bg-lewisRedDarker"}`}
-            onClick={() => setCurrentIndex(index)}
-            onDoubleClick={() => handleNameEdit(index, calendar.className)}
-            style={{ height: "40px" }}
-          >
-            {isCollapsed ? (
-              <div
-                className={`w-2.5 h-2.5 rounded-full mx-auto 
-                  ${currentIndex === index ? "bg-white" : "bg-gray"
-                }`}
-              ></div>
-            ) : editingIndex === index ? (
-                <input
-                  type="text"
-                  value={tempName}
-                  onChange={(e) => setTempName(e.target.value)}
-                  onBlur={() => handleBlur(index)}
-                  onKeyDown={(e) => handleKeyPress(e, index)}
-                  autoFocus
-                  className="bg-gray-50 text-black p-2 w-full text-sm"
-                />
-              ) : (
-                <span className="flex justify-between w-full items-center">
-                  {calendar.className || `Calendar ${index + 1}`}
-                  <button
-                    className="ml-2 text-sm text-gray hover:text-white transition"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteCalendar(calendar.id);
-                    }}
-                  >
-                    🗙
-                  </button>
-                </span>
-            )}
-          </div>
-        ))}
+        {calendars.map((calendar, index) => {
+          const rawName = calendar.className || `Calendar ${index + 1}`;
+          const MAX_LEN = 13;
+          const displayName =
+            rawName.length > MAX_LEN
+              ? rawName.substring(0, MAX_LEN) + "..."
+              : rawName;
+          return (
+            <div
+              key={index}
+              className={`flex p-2 items-center gap-2 transition duration-200 cursor-pointer
+                ${currentIndex === index ? "bg-lewisRed" : "bg-lewisRedDarker"}`}
+              onClick={() => setCurrentIndex(index)}
+              onDoubleClick={() => handleNameEdit(index, calendar.className)}
+              style={{ height: "40px" }}
+            >
+              {isCollapsed ? (
+                <div
+                  className={`w-2.5 h-2.5 rounded-full mx-auto 
+                    ${currentIndex === index ? "bg-white" : "bg-gray"
+                  }`}
+                ></div>
+              ) : editingIndex === index ? (
+                  <input
+                    type="text"
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    onBlur={() => handleBlur(index)}
+                    onKeyDown={(e) => handleKeyPress(e, index)}
+                    autoFocus
+                    className="bg-gray-50 text-black p-2 w-full text-sm"
+                  />
+                ) : (
+                  <span className="flex justify-between items-center w-full overflow-hidden">
+                    <span className="truncate flex-grow min-w-0">{displayName}</span>
+                    <button
+                      className="text-sm text-gray hover:text-white transition flex-shrink-0 ml-2"
+                      onClick={(e) => { e.stopPropagation(); deleteCalendar(calendar.id); }}
+                    >
+                      🗙
+                    </button>
+                  </span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Sidebar Toggle */}

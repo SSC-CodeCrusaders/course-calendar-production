@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "file-saver": "^2.0.5",
     "firebase": "^11.5.0",
+    "framer-motion": "^12.7.2",
     "ics": "^3.8.1",
     "openai": "^4.76.0",
     "prop-types": "^15.8.1",

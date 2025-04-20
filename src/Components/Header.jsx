@@ -1,19 +1,20 @@
 // src/Components/Header.jsx
 import { Link } from "react-router-dom";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import PropTypes from 'prop-types';
 import { auth, db } from "../utils/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { signOut } from "firebase/auth";
 
 // Header is a functional component that receives the current user logged in and the function to update the current user
 const Header = ({ user, setUser }) => {
   // userEmail is a local state that stores the user's email
   // Creates two useState variables but will give the value of the a signed in user's email if there is one
   const [userEmail, setUserEmail] = useState(user?.email || '');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // useEffect for an Authentication listener and runs when the component mounts and listens for authentication state changes
   useEffect(() => {
     // I AM EDITING USING THIS SECTION BELOW AS A FALLBACK
@@ -69,26 +70,32 @@ const Header = ({ user, setUser }) => {
     }
   };
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
   return (
     <nav className="fixed top-0 left-0 w-full bg-accent text-white py-4 z-50 px-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+      <div className="flex flex-row justify-between">
         {/* Application title with link to home */}
         <h1 className="font-crimson text-5xl font-bold hover:text-gray transition whitespace-nowrap">
           <Link to="/">LewisCal</Link>
         </h1>
-
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm mt-2 sm:mt-0">
-          <Link className="hover:text-gray transition px-3" to="/aboutus">About Us</Link>
-          <Link className="hover:text-gray transition px-3" to="/features">Features</Link>
-          <Link className="hover:text-gray transition px-3" to="/faq">FAQs</Link>
-          <Link className="hover:text-gray transition px-3" to="/tutorial">Tutorial</Link>
-          <Link className="hover:text-gray transition px-3" to="/contactus">Contact Us</Link>
-
+        {/* mobile/small screens only */}
+        <button
+          className="sm:hidden flex items-center"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+          
+        <div className="hidden sm:flex font-semibold items-center gap-1 text-sm">
+          <Link className="hover:text-gray transition px-2" to="/aboutus">About Us</Link>
+          <Link className="hover:text-gray transition px-2" to="/features">Features</Link>
+          <Link className="hover:text-gray transition px-2" to="/faq">FAQs</Link>
+          <Link className="hover:text-gray transition px-2" to="/tutorial">Tutorial</Link>
+          <Link className="hover:text-gray transition px-2" to="/contactus">Contact Us</Link>
           {!user ? (
-          // Display login/signup link if user is not logged in
-          <Link className="hover:text-gray transition px-3" to="/auth">Log In / Sign Up</Link>
+            // Display login/signup link if user is not logged in
+            <Link className="hover:text-gray transition px-2" to="/auth">Log In / Sign Up</Link>
           ) : (
             <div className="relative">
               <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-1 hover:text-gray transition">
@@ -96,7 +103,7 @@ const Header = ({ user, setUser }) => {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white text-black shadow-lg rounded-md z-50">
+                <div className="absolute right-0 mt-3 bg-accent text-white text-right divide-y-2 rounded-md z-50">
                   <Link
                     to="/profile"
                     onClick={() => setDropdownOpen(false)}
@@ -109,7 +116,7 @@ const Header = ({ user, setUser }) => {
                       handleSignOut();
                       setDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600"
+                    className="w-full text-right px-4 py-2 text-sm hover:bg-red-100 text-red-400"
                   >
                     Sign Out
                   </button>
@@ -119,6 +126,47 @@ const Header = ({ user, setUser }) => {
           )}
         </div>
       </div>
+      {/* small screen nav menu */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden divide-y-2 divide-lewisRedDarkest bg-accent rounded-md w-1/4 z-40 p-2 space-y text-right fixed right-0">
+          <Link to="/aboutus" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">About Us</Link>
+          <Link to="/features" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">Features</Link>
+          <Link to="/faq" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">FAQs</Link>
+          <Link to="/tutorial" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">Tutorial</Link>
+          <Link to="/contactus" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">Contact Us</Link>
+          {!user ? (
+            // Display login/signup link if user is not logged in
+            <Link className="hover:text-gray transition px-2" to="/auth">Log In / Sign Up</Link>
+          ) : (
+            <div className="relative">
+              <button onClick={() => setDropdownOpen(!dropdownOpen)} className="block px-4 py-4">
+                <UserCircleIcon className="top-2 absolute right-2 w-6 h-6 text-white" />
+              </button>
+
+              {dropdownOpen && (
+                <div className="fixed right-0 mt-0 bg-accent text-white text-right divide-y-2 rounded-md z-50">
+                  <Link
+                    to="/profile"
+                    onClick={() => setDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <span className="font-semibold">{userEmail}</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setDropdownOpen(false);
+                    }}
+                    className="w-full text-right px-4 py-2 text-sm hover:bg-red-100 text-red-400"
+                  >
+                    Sign Out
+                  </button>
+                </div> 
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </nav>
   );
 };

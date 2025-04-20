@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { generateICSAndUpload } from "../../utils/icsGenerator";
 import { academicCalendar } from "../../utils/academicCalendar";
@@ -10,104 +10,96 @@ const LinkPage = ({ currentCalendar }) => {
   const [icsLink, setIcsLink] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleDownloadICS = async () => {
-    console.log("Generating ICS for calendar:", currentCalendar);
-    setLoading(true);
+  useEffect(() => {
+    setIcsLink(null);
+  }, [currentCalendar]);
 
-    try {
-      // Validate required fields
-      const { className, academicTerm } = currentCalendar;
-      if (!className || !academicTerm) {
-        toast.error("Please ensure all fields are filled to generate the ICS link.");
+  const handleDownloadICS = () => {
+    const { className, academicTerm } = currentCalendar;
+    if (!className || !academicTerm) {
+      toast.error("Please ensure all fields are filled to generate the ICS file.");
+      return;
+    }
+
+    const noClassesHolidays = academicCalendar[academicTerm].holidays
+      .filter(h => h.name.includes("No Classes"))
+      .map(h => ({
+        start: new Date(h.startDate || h.date),
+        end: new Date(h.endDate || h.date)
+      }));
+    
+    const isNoClassesDay = (date) => {
+      return noClassesHolidays.some(h => date >= h.start && date <= h.end);
+    };
+
+    const scheduleEvents = generateSchedule(currentCalendar).filter(evt => {
+      return !isNoClassesDay(evt.start);
+    });
+
+    
+    const allEvents = scheduleEvents.map(evt => ({
+      title: evt.className,
+      start: [
+        evt.start.getFullYear(),
+        evt.start.getMonth() + 1,
+        evt.start.getDate(),
+        evt.start.getHours(),
+        evt.start.getMinutes(),
+      ],
+      duration: evt.duration,
+      location: evt.location,
+      description: [
+        `Instructor: ${evt.instructorName}`,
+        evt.notes ? `Notes: ${evt.notes}` : null,
+      ].filter(Boolean).join("\n"),
+      alarms: [
+        {
+          action: "display",
+          trigger: { minutes: currentCalendar.reminderMinutes || 30, before: true },
+          description: "Reminder",
+        }
+      ]
+    }));
+
+    setLoading(true);
+    createEvents(allEvents, (error, value) => {
+      if (error) {
+        console.error("ICS creation error:", error);
+        toast.error("Failed to generate ICS file.");
         setLoading(false);
         return;
       }
+      const blob = new Blob([value], { type: "text/calendar" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${className}.ics`;
+      document.body.appendChild(link)
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      // Generate schedule events
-      const scheduleEvents = generateSchedule(currentCalendar);
-
-      // Retrieve holidays for the selected academic term
-      const termHolidays = academicCalendar[academicTerm]?.holidays || [];
-      const holidayEvents = termHolidays.map((holiday) => {
-        return {
-          title: holiday.name,
-          start: (() => {
-            if (holiday.date) {
-              const d = new Date(holiday.date);
-              return [d.getFullYear(), d.getMonth() + 1, d.getDate()];
-            }
-            return null;
-          })(),
-          duration: { hours: 0, minutes: 0 },
-          description: `${holiday.name} Holiday`,
-        };
-      }).filter(ev => ev.start !== null);
-
-      const allEvents = [
-        ...scheduleEvents.map((evt) => ({
-          title: evt.className,
-          start: [
-            evt.start.getFullYear(),
-            evt.start.getMonth() + 1,
-            evt.start.getDate(),
-            evt.start.getHours(),
-            evt.start.getMinutes(),
-          ],
-          duration: evt.duration,
-          location: evt.location,
-          description: `Instructor: ${evt.instructorName || ""}`,
-        })),
-        ...holidayEvents,
-      ];
-
-      createEvents(allEvents, (error, value) => {
-        if (error) {
-          console.error("ICS creation error:", error);
-          toast.error("Failed to generate ICS file.");
-          setLoading(false);
-          return;
-        }
-
-        const blob = new Blob ([value], { type: "text/calendar" });
-        const icsUrl = URL.createObjectURL(blob);
-
-        const downloadLink = document.createElement("a");
-        downloadLink.href = icsUrl;
-        downloadLink.download = `${className || "myschedule"}.ics`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-
-        URL.revokeObjectURL(icsUrl);
-
-        toast.success("ICS file downloaded successfully.")
-        setLoading(false);
-      });
-    } catch (err) {
-      console.error("Failed to generate ICS locally:", err);
-      toast.error("Failed to generate ICS file locally.");
+      toast.success("ICS file downloaded successfully.");
       setLoading(false);
-    }
+    });
   };
 
   const handleGenerateLink = async () => {
+    const { className, academicTerm } = currentCalendar;
+    if (!className || !academicTerm) {
+      toast.error("Please ensure class name and term fields are filled.")
+      setLoading(false);
+      return;
+    }
+
+    const scheduleEvents = generateSchedule(currentCalendar);
+    if (scheduleEvents.length === 0) {
+      toast.error("No class sessions to export. Please select a time slot.");
+      return;
+    }
     setLoading(true);
-
     try {
-      const { className, academicTerm } = currentCalendar;
-      if (!className || !academicTerm) {
-        toast.error("Please ensure class name and term fields are filled.")
-        setLoading(false);
-        return;
-      }
-      const scheduleEvents = generateSchedule(currentCalendar);
-      const termHolidays = academicCalendar[academicTerm]?.holidays || [];
-      const holidayEvents = termHolidays.map((holiday) => ({
-        name: holiday.name,
-        date: new Date(holiday.date),
-      }));
-
-      const link = await generateICSAndUpload(scheduleEvents, holidayEvents, className);
+      const link = await generateICSAndUpload(scheduleEvents, [], className);
       setIcsLink(link);
       toast.success("ICS link generated successfully.");
     } catch (error) {
@@ -119,25 +111,25 @@ const LinkPage = ({ currentCalendar }) => {
   };
 
   const handleCopyToClipboard = () => {
-    if (icsLink) {
-      navigator.clipboard.writeText(icsLink)
-        .then(() => toast.success("Link copied to clipboard."))
-        .catch(() => toast.error("Failed to copy link to clipboard."));
-    }
+    if (!icsLink) return;
+    navigator.clipboard
+      .writeText(icsLink)
+      .then(() => toast.success("Link copied to clipboard."))
+      .catch(() => toast.error("Failed to copy link to clipboard."));
   };
 
   return (
-    <div className="bg-white text-black rounded-lg p-6 w-full max-w-7xl mx-auto mt-1">
-      <h1 className="text-2xl font-bold mb-4 text-center">Add Your Schedule to Your Calendar</h1>
+    <div className="bg-white text-black rounded-lg w-full max-w-7xl">
+      <h1 className="text-2xl font-bold mb-4 text-center">Generate Calendar File:</h1>
 
-      <div className="text-center space-x-4">
+      <div className="text-center space-x-1">
         {/* Direct Download */}
         <button
           onClick={handleDownloadICS}
-          className={`bg-lewisRedDarker text-white px-4 py-2 rounded ${loading ? "opacity-50" : ""}`}
+          className={`bg-lewisRedDarker text-white px-4 py-2 mb-2 rounded ${loading ? "opacity-50" : ""}`}
           disabled={loading}
         >
-          {loading ? "Generating ICS..." : "Download ICS Locally"}
+          {loading ? "Generating ICS..." : "Download ICS File"}
         </button>
 
         {/* Firebase Link */}
@@ -185,7 +177,7 @@ const LinkPage = ({ currentCalendar }) => {
             className={`bg-lewisRedDarker text-white px-4 py-2 rounded ${loading ? "opacity-50" : ""}`}
             disabled={loading}
           >
-            {loading ? "Generating Link..." : "Generate ICS Link Online"}
+            {loading ? "Generating Link..." : "Generate ICS Link"}
           </button>
         )}
       </div>
@@ -197,11 +189,17 @@ LinkPage.propTypes = {
   currentCalendar: PropTypes.shape({
     className: PropTypes.string.isRequired,
     academicTerm: PropTypes.string,
-    firstDay: PropTypes.string.isRequired,
-    lastDay: PropTypes.string.isRequired,
-    daysOfClass: PropTypes.objectOf(PropTypes.bool).isRequired,
+    firstDay: PropTypes.oneOfType([
+      PropTypes.instanceOf(Date),
+      PropTypes.shape({ toDate: PropTypes.func })
+    ]).isRequired,
+    lastDay: PropTypes.oneOfType([
+      PropTypes.instanceOf(Date),
+      PropTypes.shape({ toDate: PropTypes.func })
+    ]).isRequired,
     location: PropTypes.string,
     instructorName: PropTypes.string,
+    notes: PropTypes.string,
   }).isRequired,
 };
 
