@@ -1,6 +1,11 @@
 import { academicCalendar } from "./academicCalendar";
 
+function normalizeDate(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
 function isHolidayNoClasses(date, holidays) {
+  const normDate = normalizeDate(date);
   return holidays.some((holiday) => {
     const nameContainsNoClasses =
       holiday.name && holiday.name.toLowerCase().includes("no classes");
@@ -8,16 +13,13 @@ function isHolidayNoClasses(date, holidays) {
       return false;
     }
     if (holiday.date) {
-      const holidayDate = newDate(holiday.date);
-      return(
-        date.getFullYear() === holidayDate.getFullYear() &&
-        date.getMonth() === holidayDate.getMonth() &&
-        date.getDate() === holidayDate.getDate()
-      );
-    } if (holiday.startDate && holiday.endDate) {
-      const start = new Date(holiday.startDate);
-      const end = new Date(holiday.endDate);
-      return date >= start && date <= end;
+      const holidayDate = normalizeDate(new Date(holiday.date));
+      return normDate.getTime() === holidayDate.getTime();
+    } 
+    if (holiday.startDate && holiday.endDate) {
+      const start = normalizeDate(new Date(holiday.startDate));
+      const end = normalizeDate(new Date(holiday.endDate));
+      return normDate >= start && normDate <= end;
     }
     return false;
   });
@@ -72,7 +74,14 @@ const dayToIndex = {
     const dayName = current.toLocaleString("en-US", { weekday: "long" }).toLowerCase();
     const slots = selectedTimeSlots[dayName];
 
-    if (slots && slots.length > 0 && !isHolidayNoClasses(current, holidays)) {
+    const normalized = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+    const isHoliday = isHolidayNoClasses(normalized, holidays);
+    console.log(`[DEBUG] Date: ${normalized.toISOString()}`);
+    console.log(` Day: ${dayName}`);
+    console.log(` Slots:`, slots);
+    console.log(` Is Holiday (No Classes):`, isHoliday);
+    if (slots && slots.length > 0 && !isHoliday) {
+    
       for (const slot of slots) {
         const [sh, sm, eh, em] = parseTimeRange(slot);
         const durationHours = eh - sh + (em - sm < 0 ? -1 : 0);
@@ -83,6 +92,7 @@ const dayToIndex = {
           instructorName,
           location,
           notes,
+          slotLabel: slot,
           start: new Date(
             current.getFullYear(),
             current.getMonth(),

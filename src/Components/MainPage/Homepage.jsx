@@ -2,8 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import Sidebar from "./Sidebar";
 import CalendarPage from "./CalendarPage";
 import { AuthContext } from "../../Context/AuthProvider";
-import { fetchUserCalendars } from "../../utils/firestoreDatabase"
-import { deleteCalendar } from "../../utils/firestoreDatabase";
+import { deleteCalendar, fetchUserCalendars } from "../../utils/firestoreDatabase";
 import { toast } from "react-toastify";
 // imports added to use Firestore
 
@@ -14,17 +13,6 @@ const Homepage = () => {
   const defaultCalendar = {
     firstDay: "",
     lastDay: "",
-    startTime: "",
-    endTime: "",
-    daysOfClass: {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false,
-    },
     instructorName: "",
     className: "",
     location: "",
@@ -33,12 +21,23 @@ const Homepage = () => {
 
   const [calendars, setCalendars] = useState(() => {
     const storedCalendars = localStorage.getItem("calendars");
-    return storedCalendars ? JSON.parse(storedCalendars) : [defaultCalendar];
+    if (storedCalendars) {
+      try {
+        const parsed = JSON.parse(storedCalendars);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch {}
+    }
+    return [defaultCalendar];
   });
 
   const [currentIndex, setCurrentIndex] = useState(() => {
-    const storedIndex = localStorage.getItem("currentIndex");
-    return storedIndex ? parseInt(storedIndex, 10) : 0;
+    const storedIndex = parseInt(localStorage.getItem("currentIndex"), 10);
+    if (!isNaN(storedIndex) && storedIndex >= 0 && storedIndex < calendars.length) {
+      return storedIndex;
+    }
+    return 0;
   });
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -49,20 +48,14 @@ const Homepage = () => {
     localStorage.setItem("currentIndex", currentIndex);
   }, [calendars, currentIndex]);
 
-  // Effect to load schedules when user logs in or reset on logout
   useEffect(() => {
-    // creates a method that when called will load schedules from Firestore
-    const loadCalendars = async () => {
-      // Checks if there is a user signed in
+    async function loadCalendars() {
       if (user) {
-        // if there is a user, it will call a method from the firestoreDatabase.js file to get the calendars
         try {
-          const calendars = await fetchUserCalendars();
-
-          // Supabase approach to fetch calendars from their database
-          // const schedules = await fetchSchedules(user.id);
-          
-          setCalendars(calendars && calendars.length > 0 ? calendars : [defaultCalendar]);
+          const fetched = await fetchUserCalendars();          
+          const toUse = Array.isArray(fetched) && fetched.length > 0 ? fetched : [defaultCalendar];
+          setCalendars(toUse);
+          setCurrentIndex(idx => Math.min(idx, toUse.length - 1));
         } catch (error) {
           toast.error("Failed to load calendars from Firestore.");
           console.error("Error loading calendars: ", error);
@@ -74,24 +67,20 @@ const Homepage = () => {
         localStorage.removeItem("calendars");
         localStorage.removeItem("currentIndex");
       }
-    };
-
+    }
     loadCalendars();
   }, [user]);
 
   // Function to create a new calendar
   const createNewCalendar = () => {
-    setCalendars([...calendars, defaultCalendar]);
+    setCalendars(prev => [...prev, defaultCalendar]);
     setCurrentIndex(calendars.length); // Set the new calendar as active
   };
 
-  const updateCalendarName = (index, newName) => {
-    setCalendars((prevCalendars) =>
-      prevCalendars.map((calendar, i) =>
-        i === index ? { ...calendar, className: newName } : calendar
-      )
+  const updateCalendarName = (i, name) =>
+    setCalendars(prev =>
+      prev.map((c, idx) => (idx === i ? { ...c, className: name } : c))
     );
-  };
 
   const handleDeleteCalendar = async (calendarId) => {
     if (calendars.length === 1) {
@@ -117,26 +106,16 @@ const Homepage = () => {
   };
   
   const renderCurrentPage = () => {
-    const safeIndex = currentIndex >= 0 && currentIndex < calendars.length ? currentIndex : 0;
+    const safeIndex = Math.max(0, Math.min(currentIndex, calendars.length - 1));
     const currentCalendar = calendars?.[safeIndex];
-    if (!currentCalendar) return null;
-
-    // Ensure a valid page is always set
-    const page = currentCalendar.page ?? 0;
-
-    switch (page) {
-      case 0: // User Input
-        return (
-          <CalendarPage
-            currentCalendar={currentCalendar}
-            currentIndex={currentIndex}
-            calendars={calendars}
-            setCalendars={setCalendars}
-          />
-        );
-      default:
-        return null;
-    }
+    return (
+      <CalendarPage
+        currentCalendar={currentCalendar}
+        currentIndex={currentIndex}
+        calendars={calendars}
+        setCalendars={setCalendars}
+      />
+    );  
   };
 
   return (
