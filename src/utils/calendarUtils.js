@@ -28,22 +28,28 @@ export const getGreyedOutDates = (currentMonth, currentYear, daysInMonth, holida
         }
     }
     holidaysThisMonth.forEach(h => {
-        if (h.name.includes("No Classes")) {
-            if (h.date) {
-                const holidayDate = new Date(h.date + 'T00:00:00');
-                if (holidayDate.getMonth() === currentMonth && holidayDate.getFullYear() === currentYear) {
-                    greyedOut.add(holidayDate.getDate());
-                }
-            } else if (h.startDate && h.endDate) {
-                let currentDate = new Date(h.startDate + 'T00:00:00');
-                const endDate = new Date(h.endDate + 'T00:00:00');
-                while (currentDate <= endDate) {
-                    if (currentDate.getMonth() === currentMonth && currentDate.getFullYear() === currentYear) {
-                        greyedOut.add(currentDate.getDate());
-                    }
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
+        if (!h.name.toLowerCase().includes("no classes")) return;
+        const norm = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        if (h.date) {
+            const d = h.date instanceof Date ? norm(h.date) : norm(new Date(h.date));
+            if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+                greyedOut.add(d.getDate());
             }
+        }
+        else if (h.startDate && h.endDate) {
+            let dStart = h.startDate instanceof Date
+                ? norm(h.startDate)
+                : norm(new Date(h.startDate));
+            const dEnd = h.endDate instanceof Date
+                ? norm(h.endDate)
+                : norm(new Date(h.endDate));
+            while (dStart <= dEnd) {
+                if (dStart.getMonth() === currentMonth && dStart.getFullYear() === currentYear) {
+                    greyedOut.add(dStart.getDate());
+                }
+                dStart.setDate(dStart.getDate() + 1);
+            }
+
         }
     });
     return greyedOut;

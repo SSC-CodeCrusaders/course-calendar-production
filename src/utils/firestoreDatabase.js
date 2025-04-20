@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { collection, getDoc, setDoc, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore"
 import { db, auth } from "./firebase";
     
@@ -6,7 +5,7 @@ export const addCalendar = async (calendarData) => {
     await auth.currentUser?.reload();
     const user = auth.currentUser;
     // Checks if there is a user logged in
-    if (!user) return;
+    if (!user) return null;
 
     try {
         // This creates a variable that will have all of the calendar data and then attaches the user
@@ -21,15 +20,16 @@ export const addCalendar = async (calendarData) => {
         console.log("Calendars added with ID: " + docRef.id + " to Firestore.");
     } catch (error) {
         console.error("Error adding calendar: ", error);
+        return null;
     }
-}
+};
 
 export const fetchUserCalendars = async () => {
     // this will reload Firebase as well as the current user
     await auth.currentUser?.reload();
 
     // checks if there is a user logged in and if not, so currentUser=Null, it just returns
-    if (!auth.currentUser) return
+    if (!auth.currentUser) return [];
 
     // Gets the userID of the current signed in user
     const userUid = auth.currentUser.uid;
@@ -54,12 +54,9 @@ export const fetchUserCalendars = async () => {
 
 export const updateUserCalendar = async (userId, calendarId, updatedData) => {
     if (!userId || !calendarId) throw new Error("Missing user ID or calendar ID.");
-
-    const userUid = auth.currentUser.uid;
-    const calendarRef = doc(db, "calendars", userUid, "userCalendars", calendarId);
-
     try {
-        await updateDoc(calendarRef, updatedData);
+        await updateDoc(doc(db, "calendars", userId, "userCalendars", calendarId), updatedData);
+        return true;
     } catch (error) {
         console.error("Firestore update failed:", error);
         throw error;
@@ -79,43 +76,3 @@ export const deleteCalendar = async (calendarId) => {
         console.error("Error deleting calendar: ", error);
     }
 };
-
-    /* 
-    SECTION BELOW WAS CREATED FROM A VIDEO ABOUT HOW TO IMPLEMENT FIRESTORE IN A REACT APP
-    THIS SECTION BELOW MAY NOT BE NEEDED ANYMORE AND COULD POSSIBLY BE REMOVED
-    THE ABOVE SECTION WILL FOLLOW MORE OF CHATGPT IMPLEMENTATION AND FIRESTORE DOCUMENTATION
-    
-    // creates a useState
-    const [calendars, setCalendars] = useState([]);
-
-    // This useEffect will grab the calendars from the Firestore database
-    useEffect(() => {
-        getCalendars();
-    }, []);
-
-    // creates a function that will get the calendars from Firestore
-    async function getCalendars() {
-        // This is getting the database reference from the db variable exported from the firebase.js file
-        // and finding the collection with the calendars name
-        const calendarCollectionRef = collection(db, "calendars")
-        // This will attempt to get the document, if it is successful then it will
-        getDocs(calendarCollectionRef)
-        .then(Response => {
-            console.log(Response);
-            // This will loop through all of the documents that are present inside of the calendar collection
-            // We use the map function to then get an individual document.  Each document also has an id
-            // and data
-            const cals = Response.docs.map(doc => ({data: doc.data(), id: doc.id}));
-            // This now sets the calendars using the setCalendars method from the useState
-            // This sets the calendars variable to the data that is coming from the Firestore database
-            setCalendars(cals)
-        }).catch(error => console.log(error.message));
-    }
-
-    async function addCalendars() {
-        // Follows the same from the getCalendars method for getting a reference to the collection
-        const calendarCollectionRef = await addDoc(collection(db, "calendars"), {
-            // TODO: Add data to save to Firestore database
-        });
-    }
-    */

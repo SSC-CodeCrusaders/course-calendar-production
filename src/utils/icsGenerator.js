@@ -4,8 +4,8 @@ import { storage } from "./firebase";
 
 function calculateDuration(start, end) {
   try {
-    const [startHour, startMinute] = start.split(":".padEnd(5, "0")).map(Number);
-    const [endHour, endMinute] = end.split(":".padEnd(5, "0")).map(Number);
+    const [startHour, startMinute] = start.split(":").map(Number);
+    const [endHour, endMinute] = end.split(":").map(Number);
 
     let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
     if (totalMinutes < 0) totalMinutes += 24 * 60;
@@ -18,34 +18,39 @@ function calculateDuration(start, end) {
   }
 }
 
+const escapeICS = (str = "") =>
+  str.replace(/\\/g, "\\\\")
+  .replace(/,/g, "\\,")
+  .replace(/;/g, "\\;")
+  .replace(/:/g, "\\:");
+
 export async function generateICSAndUpload(scheduleEvents, holidays, calendarName) {
   const events = scheduleEvents.map((event) => {
     const { hours, minutes } = calculateDuration(event.startTime, event.endTime);
 
+    const lines = [
+      `Instructor: ${event.instructorName}`,
+      event.notes ? `Notes: ${event.notes}` : null,
+    ].filter(Boolean);
+
     return {
-      title: event.className,
+      title: escapeICS(event.className),
+      location: escapeICS(event.location),
+      description: escapeICS(lines.join("\\n")),
       start: (() => {
-        try {
-          const d = new Date(event.start);
-          if (isNaN(d)) throw new Error("Invalid start date");
-          return [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes()];
-        } catch (err) {
-          console.error("Invalid event.start for event:", event);
-          throw err;
-        }
+        const d = new Date(event.start);
+        if (isNaN(d)) throw new Error("Invalid start date");
+        return [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes()];
       })(),
-      duration: {
-        hours,
-        minutes,
-      },
-      location: event.location,
-      description: `Instructor: ${event.instructorName}`,
+      duration: { hours, minutes },
+      alarms: [
+        {
+          action: "display",
+          trigger: { minutes: event.reminderMinutes || 30, before: true },
+          description: "Reminder",
+        },
+      ]
     };
-  });
-  
-  holidays.forEach((holiday) => {
-    const isNoClasses = holiday.name?.toLowerCase().includes("no classes");
-    if (isNoClasses) return;
   });
 
   return new Promise((resolve, reject) => {
