@@ -101,7 +101,7 @@ const AboutUsPage = () => {
           <div className='flex items-center group/item hover:bg-red-700 bg-lewisRed p-2'>
             <img src="/img/aaron.jpg" alt='Aaron Rader' className=" ml-2 mr-1 mt-2 w-32 h-32 rounded-full object-cover"/>
             <div className='ml-2 overflow-hidden'>
-              <strong className='mb-1 text-xl text-white'>Benyamin Bamburac</strong>
+              <strong className='mb-1 text-xl text-white'>Aaron Rader</strong>
               <br></br>
               <a className="text-b  truncate text-white" href="mailto:aaronrader@lewisu.edu">aaronrader@lewisu.edu</a>
             </div>
