@@ -96,6 +96,18 @@ const AboutUsPage = () => {
               <a className="text-b  truncate text-white" href="mailto:joshuambunty@lewisu.edu">joshuambunty@lewisu.edu</a>
             </div>
           </div>
+
+          {/*Justin's About*/}
+          <div className='flex items-center group/item hover:bg-red-700 bg-lewisRed p-2'>
+            <img src="/img/justin.jpg" alt='Justin Ajuogu' className=" ml-2 mr-1 mt-2 w-32 h-32 rounded-full object-cover"/>
+            <div className='ml-2 overflow-hidden'>
+              <strong className='mb-1 text-xl text-white'>Justin Ajuogu</strong>
+              <br></br>
+              <a className="text-b  truncate text-white" href="justinajuogu@lewisu.edu">justinajuogu@lewisu.edu</a>
+            </div>
+          </div>
+
+
         </div>
       </div>
 
