@@ -3,7 +3,12 @@ import React from "react";
 
 
 const FeaturesPage = () => {
-  return (
+  return (<div className="relative w-screen h-screen">
+	<div className="absolute inset-0 bg-cover bg-center opacity-30 z-0"
+							style={{ 
+									backgroundImage: "url('/img/lewis_front.jpg')", 
+							}}
+                ></div>
     <div className="container mx-auto px-8 py-12">
       <h2 className="text-4xl font-bold mb-6 text-primary text-center">
         Key Features
@@ -78,7 +83,7 @@ const FeaturesPage = () => {
         </li>
       </ul>
     </div>
-  );
+	</div>);
 };
 
 export default FeaturesPage;

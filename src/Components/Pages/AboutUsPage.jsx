@@ -107,9 +107,28 @@ const AboutUsPage = () => {
             </div>
           </div>
 
-
+          {/*Aaron's About*/}
+          <div className='flex items-center group/item hover:bg-red-700 bg-lewisRed p-2'>
+            <img src="/img/aaron.jpg" alt='Aaron Rader' className=" ml-2 mr-1 mt-2 w-32 h-32 rounded-full object-cover"/>
+            <div className='ml-2 overflow-hidden'>
+              <strong className='mb-1 text-xl text-white'>Aaron Rader</strong>
+              <br></br>
+              <a className="text-b  truncate text-white" href="mailto:aaronrader@lewisu.edu">aaronrader@lewisu.edu</a>
+            </div>
+          </div>
+        
+          {/*Benyamin's About*/}
+          <div className='flex items-center group/item hover:bg-red-700 bg-lewisRed p-2'>
+            <img src="/img/benyamin.jpg" alt='Benyamin Bamburac' className=" ml-2 mr-1 mt-2 w-32 h-32 rounded-full object-cover"/>
+            <div className='ml-2 overflow-hidden'>
+              <strong className='mb-1 text-xl text-white'>Benyamin Bamburac</strong>
+              <br></br>
+              <a className="text-b  truncate text-white" href="mailto:benyaminfbamburac@lewisu.edu">benyaminfbamburac@lewisu.edu</a>
+            </div>
+          </div>
         </div>
       </div>
+      
 
       {/*
       <div className="w-screen h-screen">

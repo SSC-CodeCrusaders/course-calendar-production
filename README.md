@@ -133,6 +133,10 @@ Summary:
 - **Email**: justinajuogu@lewisu.edu
 - **Github**: jagit2024
 
+- **Name**: Aaron Rader
+- **Email**: aaronrader@lewisu.edu
+- **Github**: Aaron-2792
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE)..
