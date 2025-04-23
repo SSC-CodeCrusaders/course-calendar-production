@@ -37,8 +37,9 @@ const Sidebar = ({
   };
 
   return (
-    <aside className={`fixed left-0 h-[calc(100vh-80px)] bg-lewisRedDarker text-white flex flex-col
-      transition-all duration-200 ${ isCollapsed ? "w-12" : "w-58" }`}>
+    <aside className={`fixed left-0 h-[calc(100vh-80px)] bg-lewisRedDarker text-white flex flex-col text-nowrap
+      transition-all duration-200 ${ isCollapsed ? "w-12" : "w-44" } z-50`}
+    >
       
       {/* Sidebar Title */}
       <div className="bg-accent flex justify-center">

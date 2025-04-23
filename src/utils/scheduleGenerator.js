@@ -62,6 +62,7 @@ const dayToIndex = {
     location,
     academicTerm,
     notes,
+    reminderMinutes,
   }) => {
   const holidays = academicCalendar[academicTerm]?.holidays || [];
   const startDate = new Date(firstDay);
@@ -92,6 +93,7 @@ const dayToIndex = {
           instructorName,
           location,
           notes,
+          reminderMinutes,
           slotLabel: slot,
           start: new Date(
             current.getFullYear(),
