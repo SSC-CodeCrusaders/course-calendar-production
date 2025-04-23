@@ -55,6 +55,23 @@ export const getGreyedOutDates = (currentMonth, currentYear, daysInMonth, holida
     return greyedOut;
 };
 
+export const isNoClassesHoliday = (date, holidays) => {
+    return holidays.some(h => {
+        if (!h.name.toLowerCase().includes("no classes")) return false;
+        const norm = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const target = norm(date);
+
+        if (h.date) return target.getTime() === norm(h.date).getTime();
+
+        if (h.startDate && h.endDate) {
+            const start = norm(h.startDate);
+            const end = norm(h.endDate);
+            return target >= start && target <= end;
+        }
+        return false;
+    });
+};
+
 export const generateCalendarDays = (firstDayIndex, prevMonthDays, currentYear, currentMonth, daysInMonth, greyedOutDates) => {
     const prevDays = Array.from({ length: firstDayIndex }, (_, i) => {
         const day = prevMonthDays - firstDayIndex + i + 1;

@@ -1,8 +1,7 @@
-import { collection, getDoc, setDoc, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore"
+import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore"
 import { db, auth } from "./firebase";
     
 export const addCalendar = async (calendarData) => {
-    await auth.currentUser?.reload();
     const user = auth.currentUser;
     // Checks if there is a user logged in
     if (!user) return null;
@@ -17,7 +16,7 @@ export const addCalendar = async (calendarData) => {
         // If there exists no collection, document, or sub-collection then it will simply create it.
         // Otherwise it will just add to it.  The Calendar will also be given a unique ID whenever a new one is created
         const docRef = await addDoc(collection(db, "calendars", user.uid, "userCalendars"), calendarDataWithEmail);
-        console.log("Calendars added with ID: " + docRef.id + " to Firestore.");
+        return docRef.id;
     } catch (error) {
         console.error("Error adding calendar: ", error);
         return null;
@@ -64,7 +63,6 @@ export const updateUserCalendar = async (userId, calendarId, updatedData) => {
 }
 
 export const deleteCalendar = async (calendarId) => {
-    await auth.currentUser?.reload();
     const user = auth.currentUser;
     if (!user || !calendarId) return;
 
@@ -75,4 +73,28 @@ export const deleteCalendar = async (calendarId) => {
     } catch (error) {
         console.error("Error deleting calendar: ", error);
     }
+};
+
+export const purgeUserCalendars = async (userId) => {
+    if (!userId) return;
+    try {
+        const root = collection(db, "calendars", userId, "userCalendars");
+        const snapshot = await getDocs(root);
+        const deletions = snapshot.docs.map((d) => deleteDoc(d.ref));
+        await Promise.all(deletions);
+        console.log(`Purged ${deletions.length} calendars for ${userId}`);
+    } catch (err) {
+        console.error("Calendar purge failed:", err);
+        throw err;
+    }
+};
+
+export const updateUserEmailInFirestore = async (uid, newEmail) => {
+  try {
+    const userDocRef = doc(db, "users", uid);
+    await updateDoc(userDocRef, {email: newEmail });
+    console.log("Firestore email updated.");
+  } catch (err) {
+    console.error("Error updating email in Firestore:", err.message);
+  }
 };

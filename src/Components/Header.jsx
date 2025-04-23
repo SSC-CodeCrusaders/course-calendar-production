@@ -24,6 +24,7 @@ const Header = ({ user, setUser }) => {
       if (currentUser) {
         // This will update the global state
         setUser(currentUser);
+        await currentUser.reload();
         setUserEmail(currentUser.email); // Set email immediately from auth
 
         // Fetch email from Firebase if available
@@ -128,7 +129,7 @@ const Header = ({ user, setUser }) => {
       </div>
       {/* small screen nav menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden divide-y-2 divide-lewisRedDarkest bg-accent rounded-md w-1/4 z-40 p-2 space-y text-right fixed right-0">
+        <div className="sm:hidden divide-y-2 divide-lewisRedDarkest bg-accent rounded-md z-40 p-2 space-y text-right fixed right-0">
           <Link to="/aboutus" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">About Us</Link>
           <Link to="/features" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">Features</Link>
           <Link to="/faq" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-100">FAQs</Link>

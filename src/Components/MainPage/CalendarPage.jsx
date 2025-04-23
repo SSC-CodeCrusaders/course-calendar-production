@@ -5,6 +5,7 @@ import LinkPage from "./LinkPage";
 import { AuthContext } from "../../Context/AuthProvider";
 import { getHolidaysThisMonth, getGreyedOutDates, generateCalendarDays } from "../../utils/calendarUtils";
 import { academicCalendar } from "../../utils/academicCalendar";
+import { isNoClassesHoliday } from "../../utils/calendarUtils";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }) => {
@@ -24,10 +25,24 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
     makeSets(currentCalendar.selectedTimeSlots)
   );
 
+  const shallowEqualSets = (a = {}, b = {}) => {
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) return false;
+    return keysA.every(
+      k =>
+        b[k] &&
+        a[k].size === b[k].size &&
+        [...a[k]].every(v => b[k].has(v))
+    );
+  };
+
   useEffect(() => {
-    setSelectedTimeSlots(makeSets(currentCalendar.selectedTimeSlots));
+    const incoming = makeSets(currentCalendar.selectedTimeSlots);
+    if (shallowEqualSets(selectedTimeSlots, incoming)) return;
+    setSelectedTimeSlots(incoming)
     setExpandedDay({ day: null, month: null, year: null });
-  }, [currentIndex]);
+  }, [currentIndex, currentCalendar.selectedTimeSlots]);
 
   const determineCurrentTerm = () => {
     const today = new Date();
@@ -52,13 +67,21 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
       selectedTimeSlotsObject[day] = Array.from(selectedTimeSlots[day]);
     });
 
-    const updatedCalendars = calendars.map((calendar, index) =>
-    index === currentIndex
-      ? { ...calendar, selectedTimeSlots: selectedTimeSlotsObject, academicTerm: selectedTerm || "SP2025" }
-      : calendar
+    setCalendars(prev =>
+      prev.map((cal, idx) => {
+        if (idx !== currentIndex) return cal;
+        const noChange =
+          cal.academicTerm === selectedTerm &&
+          shallowEqualSets(makeSets(cal.selectedTimeSlots), selectedTimeSlots);
+        return {
+          ...cal,
+          selectedTimeSlots:selectedTimeSlotsObject,
+          academicTerm:selectedTerm || "SP2025",
+          dirty: !noChange
+        };
+      })
     );
-    setCalendars(updatedCalendars);
-  }, [selectedTimeSlots]);
+  }, [selectedTimeSlots, selectedTerm]);
 
   useEffect(() => {
     const today = new Date();
@@ -74,6 +97,17 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
     }
     setExpandedDay({ day: null, month: null, year: null });
   }, [selectedTerm]);
+
+  useEffect(() => {
+    if (expandedDay.day === null) return;
+    const handleClickOutside = (e) => {
+      const dropdown = document.querySelector('[data-timeslot-dropdown]');
+      if (dropdown && dropdown.contains(e.target)) return;
+      setExpandedDay({ day: null, month: null, year: null });
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [expandedDay]);
 
   const holidays = academicCalendar[selectedTerm]?.holidays || [];
 
@@ -96,7 +130,7 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
   const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
   const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
 
-  const holidaysThisMonth = useMemo(() => getHolidaysThisMonth(holidays, currentMonth, currentYear), [currentMonth, currentYear]);
+  const holidaysThisMonth = useMemo(() => getHolidaysThisMonth(holidays, currentMonth, currentYear), [holidays, currentMonth, currentYear]);
   const greyedOutDates = useMemo(() => getGreyedOutDates(currentMonth, currentYear, daysInMonth, holidaysThisMonth), [currentMonth, currentYear, daysInMonth, holidaysThisMonth]);
   const calendarDays = useMemo(() => generateCalendarDays(firstDayIndex, prevMonthDays, currentYear, currentMonth, daysInMonth, greyedOutDates), 
     [firstDayIndex, prevMonthDays, currentYear, currentMonth, daysInMonth, greyedOutDates]);
@@ -111,8 +145,11 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
       const updated = { ...prev };
       const updatedSlots = new Set(updated[dayOfWeek] || []);
       updatedSlots.has(slot) ? updatedSlots.delete(slot) : updatedSlots.add(slot);
-      if (updatedSlots) updated[dayOfWeek] = updatedSlots;
-      else delete updated[dayOfWeek];
+      if (updatedSlots.size) {
+        updated[dayOfWeek] = updatedSlots;
+      } else {
+        delete updated[dayOfWeek];
+      }
       return updated;
     });
   };
@@ -163,7 +200,8 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
             const dayOfWeek = daysOfWeek[date.getDay()].toLowerCase();
             const isCurrentMonth = !isPrevMonth && !isNextMonth;
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-            const isHoliday = isCurrentMonth && greyedOutDates.has(day);
+            const holidayCheckDate = new Date(dayObj.year, dayObj.month, dayObj.day);
+            const isHoliday = isNoClassesHoliday(holidayCheckDate, holidays);
             const isBeforeTerm = date < termStart;
             const isAfterTerm = date > termEnd;
             const isGreyedOut = isWeekend || isHoliday || isBeforeTerm || isAfterTerm;
@@ -180,14 +218,15 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
                 key={index} 
                 className={`p-3 border-t border-l text-center sm:text-sm cursor-pointer relative
                   ${isGreyedOut 
-                    ? 'bg-gray text-slate-500 cursor-not-allowed z-0' 
+                    ? 'bg-gray text-slate-500 cursor-not-allowed' 
                     : isSelectedDay
-                      ? 'bg-lewisRed text-white cursor-pointer z-0' 
-                      : 'bg-white cursor-pointer z-0'}
-                  ${isToday ? 'ring-2 ring-red-500 z-10' : ''}
+                      ? 'bg-lewisRed text-white cursor-pointer' 
+                      : 'bg-white cursor-pointer'}
+                  ${isToday ? 'ring-inset ring-2 ring-blue-400 z-10' : ''}
                   ${isExpanded ? 'z-50' : ''}
                 `}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (!isGreyedOut && timeSlots[dayOfWeek]) {
                     setExpandedDay(
                       isExpanded 
@@ -201,12 +240,14 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
                 <AnimatePresence initial={false}>
                     {isExpanded && (
                     <motion.div
+                      data-timeslot-dropdown
                       key="dropdown"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                      className="absolute aria-expanded left-0 w-full z-50 overflow-hidden bg-white border-lrb rounded-b-lg shadow-xl p-2 space-y-1"
+                      initial={{ height: 0 }}
+                      animate={{ height: "auto" }}
+                      exit={{ height: 0 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      className={`absolute left-0 top-full w-full z-50 overflow-hidden bg-white border-lrb rounded-b-lg shadow-xl p-2 space-y-1
+                        ${selectedTimeSlots[dayOfWeek]?.size > 0 ? 'bg-lewisRed text-white' : 'bg-white text-black'}`}
                     >
                       {timeSlots[dayOfWeek]?.map((slot, idx) => {
                         const isSelected = selectedTimeSlots[dayOfWeek]?.has(slot);
@@ -229,6 +270,21 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
               </div>
             );
           })}
+        </div>
+        <div className="flex justify-end mt-2 pr-1">
+          <span className={`text-sm font-semibold 
+            ${currentCalendar.dirty 
+              ? "text-orange-500" 
+              : currentCalendar.id
+                ? "text-green-500"
+                : "text-red-500"}`}
+          >
+            {currentCalendar.dirty 
+              ? "Unsaved changes" 
+              : currentCalendar.id
+                ? "Saved"
+                : "Not Saved"}
+          </span>
         </div>
       </div>
 {/*
@@ -286,6 +342,9 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
           <LinkPage
             currentCalendar={{
               ...currentCalendar,
+              selectedTimeSlots: Object.fromEntries(
+                Object.entries(selectedTimeSlots).map(([d, set]) => [d, [...set]])
+              ),
               firstDay:
                 currentCalendar.firstDay instanceof Date
                   ? currentCalendar.firstDay

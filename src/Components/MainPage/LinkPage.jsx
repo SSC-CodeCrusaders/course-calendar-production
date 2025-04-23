@@ -15,7 +15,9 @@ const LinkPage = ({ currentCalendar }) => {
   }, [currentCalendar]);
 
   const handleDownloadICS = () => {
-    const { className, academicTerm } = currentCalendar;
+    const { className, academicTerm, reminderMinutes } = currentCalendar;
+    const mRaw = Number(reminderMinutes);
+    const minutes = isNaN(mRaw) ? 30 : mRaw;
     if (!className || !academicTerm) {
       toast.error("Please ensure all fields are filled to generate the ICS file.");
       return;
@@ -52,13 +54,13 @@ const LinkPage = ({ currentCalendar }) => {
         `Instructor: ${evt.instructorName}`,
         evt.notes ? `Notes: ${evt.notes}` : null,
       ].filter(Boolean).join("\n"),
-      alarms: [
-        {
+      ...(minutes > 0 && {
+        alarms: [{
           action: "display",
-          trigger: { minutes: currentCalendar.reminderMinutes || 30, before: true },
+          trigger: { minutes, before: true },
           description: "Reminder",
-        }
-      ]
+        }]
+      })
     }));
 
     setLoading(true);
@@ -85,7 +87,9 @@ const LinkPage = ({ currentCalendar }) => {
   };
 
   const handleGenerateLink = async () => {
-    const { className, academicTerm } = currentCalendar;
+    const { className, academicTerm, reminderMinutes } = currentCalendar;
+    const mRaw = Number(reminderMinutes);
+    const minutes = isNaN(mRaw) ? 30 : mRaw;
     if (!className || !academicTerm) {
       toast.error("Please ensure class name and term fields are filled.")
       setLoading(false);

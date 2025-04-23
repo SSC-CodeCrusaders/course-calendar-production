@@ -2,9 +2,20 @@ import React, { useState, useEffect, useContext } from "react";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
 import { academicCalendar } from "../../utils/academicCalendar";
+import { generateSchedule } from "../../utils/scheduleGenerator";
 import { AuthContext } from "../../Context/AuthProvider";
 // Added import for Firestore methods
 import { addCalendar, updateUserCalendar } from "../../utils/firestoreDatabase"
+
+const WEEKDAY_ORDER = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
 
 const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
   const { user } = useContext(AuthContext);
@@ -32,6 +43,8 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
   const saveScheduleHandler = async () => {
     
     const { className, instructorName, location, academicTerm, selectedTimeSlots, id, } = currentCalendar;
+    const raw = Number(currentCalendar.reminderMinutes);
+    const resolvedReminder = isNaN(raw) ? 30 : raw;
     const termStart = academicCalendar[academicTerm]?.termStart;
     const termEnd = academicCalendar[academicTerm]?.termEnd;
 
@@ -55,9 +68,10 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
     }
 
     const greyedOutDates = getGreyedOutDatesForTerm(academicTerm);
-    const hasInvalidSlots = Object.entries(selectedTimeSlots).some(([day, slots]) => {
-      return slots.some(slot => greyedOutDates.has(day));
-    });
+    const sessions = generateSchedule(currentCalendar);
+    const hasInvalidSlots = sessions.some(sess =>
+      greyedOutDates.has(sess.start.toISOString().split("T")[0])
+    );
     if (hasInvalidSlots) {
       toast.error("Selected slots include invalid dates (weekends or holidays).");
       return;
@@ -65,6 +79,7 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
     
     const scheduleData = { 
       ...currentCalendar, 
+      reminderMinutes: resolvedReminder,
       notes, 
       firstDay: termStart, 
       lastDay: termEnd, 
@@ -75,10 +90,20 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
         if (currentCalendar.id) {
           console.log("Update calendar", {userId: user.uid, calendarId: currentCalendar.id, data: scheduleData,});
           await updateUserCalendar(user.uid, currentCalendar.id, scheduleData);
-          toast.success("Schedule updated to your account!");
+          toast.success("Schedule updated.");
+          setCalendars(prev =>
+            prev.map((c, i) =>
+              i === currentIndex ? { ...c, dirty:false } : c
+            )
+          );
         } else {
-          await addCalendar(scheduleData);
-          toast.success("Schedule saved to your account!");
+          const newId = await addCalendar(scheduleData);
+          toast.success("Schedule saved.");
+          setCalendars(prev =>
+            prev.map((c, i) =>
+              i === currentIndex ? { ...c, dirty:false, id:newId } : c
+            )
+          );
         }
       } else {
         localStorage.setItem("calendars", JSON.stringify(calendars));
@@ -135,10 +160,12 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
           <div className="w-full md:w-1/2">
             <h2 className="text-xl font-semibold mb-1">Selected Class Times:</h2>
             <ul className="list-disc pl-5 text-black mb-4">
-              {Object.entries(currentCalendar.selectedTimeSlots ?? {}).map(([weekday, slots]) => (
+              {Object.entries(currentCalendar.selectedTimeSlots ?? {}).sort(([w1], [w2]) => 
+                WEEKDAY_ORDER.indexOf(w1) - WEEKDAY_ORDER.indexOf(w2)).map(([weekday, slots]) => (
                 Array.isArray(slots) && slots.length > 0 && (
                 <li key={weekday}>
-                  <span className="font-bold capitalize">{weekday}:</span> {[...slots].join(", ")}
+                  <span className="font-bold capitalize">{weekday}:</span>{" "}
+                  {[...slots].join(", ")}
                 </li>
                 )
               ))}
@@ -162,10 +189,16 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
               <input
                 type="number"
                 min="0"
-                value={currentCalendar.reminderMinutes || 30}
+                placeholder="30"
+                value={currentCalendar.reminderMinutes ?? ""}
                 onChange={(e) => {
                   const updated = [...calendars];
-                  updated[currentIndex].reminderMinutes = parseInt(e.target.value);
+                  const val = e.target.value;
+                  if (val === "") {
+                    delete updated[currentIndex].reminderMinutes;
+                  } else {
+                    updated[currentIndex].reminderMinutes = parseInt(val, 10);
+                  }
                   setCalendars(updated);
                 }}
                 className="p-2 border rounded-lg w-full"
