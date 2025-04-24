@@ -1,41 +1,111 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { generateICSAndUpload } from "../../utils/icsGenerator";
 import { academicCalendar } from "../../utils/academicCalendar";
 import { generateSchedule } from "../../utils/scheduleGenerator";
 import PropTypes from "prop-types";
+import { createEvents } from "ics";
 
 const LinkPage = ({ currentCalendar }) => {
   const [icsLink, setIcsLink] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleGenerateLink = async () => {
-    console.log("Generating ICS for calendar:", currentCalendar);
-    setLoading(true);
+  useEffect(() => {
+    setIcsLink(null);
+  }, [currentCalendar]);
 
-    try {
-      // Validate required fields
-      const { className, startTime, endTime, academicTerm } = currentCalendar;
-      if (!className || !startTime || !endTime || !academicTerm) {
-        toast.error("Please ensure all fields are filled to generate the ICS link.");
+  const handleDownloadICS = () => {
+    const { className, academicTerm, reminderMinutes } = currentCalendar;
+    const mRaw = Number(reminderMinutes);
+    const minutes = isNaN(mRaw) ? 30 : mRaw;
+    if (!className || !academicTerm) {
+      toast.error("Please ensure all fields are filled to generate the ICS file.");
+      return;
+    }
+
+    const noClassesHolidays = academicCalendar[academicTerm].holidays
+      .filter(h => h.name.includes("No Classes"))
+      .map(h => ({
+        start: new Date(h.startDate || h.date),
+        end: new Date(h.endDate || h.date)
+      }));
+    
+    const isNoClassesDay = (date) => {
+      return noClassesHolidays.some(h => date >= h.start && date <= h.end);
+    };
+
+    const scheduleEvents = generateSchedule(currentCalendar).filter(evt => {
+      return !isNoClassesDay(evt.start);
+    });
+
+    
+    const allEvents = scheduleEvents.map(evt => ({
+      title: evt.className,
+      start: [
+        evt.start.getFullYear(),
+        evt.start.getMonth() + 1,
+        evt.start.getDate(),
+        evt.start.getHours(),
+        evt.start.getMinutes(),
+      ],
+      duration: evt.duration,
+      location: evt.location,
+      description: [
+        `Instructor: ${evt.instructorName}`,
+        evt.notes ? `Notes: ${evt.notes}` : null,
+      ].filter(Boolean).join("\n"),
+      ...(minutes > 0 && {
+        alarms: [{
+          action: "display",
+          trigger: { minutes, before: true },
+          description: "Reminder",
+        }]
+      })
+    }));
+
+    setLoading(true);
+    createEvents(allEvents, (error, value) => {
+      if (error) {
+        console.error("ICS creation error:", error);
+        toast.error("Failed to generate ICS file.");
         setLoading(false);
         return;
       }
+      const blob = new Blob([value], { type: "text/calendar" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${className}.ics`;
+      document.body.appendChild(link)
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      // Generate schedule events
-      const scheduleEvents = generateSchedule(currentCalendar);
+      toast.success("ICS file downloaded successfully.");
+      setLoading(false);
+    });
+  };
 
-      // Retrieve holidays for the selected academic term
-      const termHolidays = academicCalendar[academicTerm]?.holidays || [];
-      const holidayEvents = termHolidays.map((holiday) => ({
-        name: holiday.name,
-        date: new Date(holiday.date),
-      }));
+  const handleGenerateLink = async () => {
+    const { className, academicTerm, reminderMinutes } = currentCalendar;
+    const mRaw = Number(reminderMinutes);
+    const minutes = isNaN(mRaw) ? 30 : mRaw;
+    if (!className || !academicTerm) {
+      toast.error("Please ensure class name and term fields are filled.")
+      setLoading(false);
+      return;
+    }
 
-      // Generate and upload ICS file, then set the link
-      const link = await generateICSAndUpload(scheduleEvents, holidayEvents, className);
-      setIcsLink(link.publicUrl);
-      toast.success("ICS link generated successfully!");
+    const scheduleEvents = generateSchedule(currentCalendar);
+    if (scheduleEvents.length === 0) {
+      toast.error("No class sessions to export. Please select a time slot.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const link = await generateICSAndUpload(scheduleEvents, [], className);
+      setIcsLink(link);
+      toast.success("ICS link generated successfully.");
     } catch (error) {
       console.error("Failed to generate ICS link:", error);
       toast.error("Failed to generate ICS link. Please try again.");
@@ -45,51 +115,62 @@ const LinkPage = ({ currentCalendar }) => {
   };
 
   const handleCopyToClipboard = () => {
-    if (icsLink) {
-      navigator.clipboard.writeText(icsLink).then(() => {
-        toast.success("Link copied to clipboard!");
-      }).catch(() => {
-        toast.error("Failed to copy the link.");
-      });
-    }
+    if (!icsLink) return;
+    navigator.clipboard
+      .writeText(icsLink)
+      .then(() => toast.success("Link copied to clipboard."))
+      .catch(() => toast.error("Failed to copy link to clipboard."));
   };
 
   return (
-    <div className="bg-lewisRed min-h-screen flex flex-col items-center justify-start p-12">
-      <h1 className="text-white text-3xl font-bold mb-8 text-center">Add Your Schedule to Your Calendar</h1>
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl text-center">
+    <div className="bg-white text-black rounded-lg w-full max-w-7xl">
+      <h1 className="text-2xl font-bold mb-4 text-center">Generate Calendar File:</h1>
+
+      <div className="text-center space-x-1">
+        {/* Direct Download */}
+        <button
+          onClick={handleDownloadICS}
+          className={`bg-lewisRedDarker text-white px-4 py-2 mb-2 rounded ${loading ? "opacity-50" : ""}`}
+          disabled={loading}
+        >
+          {loading ? "Generating ICS..." : "Download ICS File"}
+        </button>
+
+        {/* Firebase Link */}
         {icsLink ? (
           <>
-            <p className="mb-6 text-lg">
-              Your schedule is ready! Use the link below to add it to your calendar:
-            </p>
-            <div className="flex justify-center mb-6">
+            <p className="text-lg">Your sharable link:</p>
+            <div className="flex justify-center mb-6 gap-2">
               <button
                 onClick={handleCopyToClipboard}
-                className="mt-4 bg-green-500 text-white px-4 py-2 rounded mr-4"
+                className="bg-green-500 text-white px-4 py-2 rounded"
               >
                 Copy Link
               </button>
-              {/* <a
+              <a
                 href={icsLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded mr-4"
+                className="bg-blue-500 text-white px-4 py-2 rounded"
               >
                 Open Link
-              </a> */}
+              </a>
             </div>
-            <div className="text-left">
-              <h2 className="text-xl font-semibold mb-4">How to Use This Link</h2>
-              <ul className="list-disc ml-6 text-gray-700">
+
+            <div className="text-left mx-auto max-w-lg">
+              <h2 className="text-xl font-semibold mb-4">How to use this link:</h2>
+              <ul className="list-disc ml-6 text-red-900">
                 <li>
-                  <strong>Google Calendar:</strong> Go to <strong>Google Calendar</strong>, click on <strong>+ Add Other Calendars {'>'} From URL</strong>, and paste the link.
+                  <strong>Google Calendar:</strong>
+                  Go to Google Calendar, click <strong>+ Add Other Calendars {'>'} From URL</strong>, and paste the link.
                 </li>
                 <li>
-                  <strong>Apple Calendar:</strong> Open the Calendar app, go to <strong>File {'>'} New Calendar Subscription</strong>, and paste the link.
+                  <strong>Apple Calendar:</strong>
+                  Open Apple Calendar,  go <strong>File {'>'} New Calendar Subscription</strong>, and paste the link.
                 </li>
                 <li>
-                  <strong>Outlook:</strong> Go to <strong>File {'>'} Account Settings {'>'} Account Settings {'>'} Internet Calendars {'>'} New</strong>, and paste the link.
+                  <strong>Outlook:</strong>
+                  <strong>File {'>'} Account Settings {'>'} Account Settings {'>'} Internet Calendars {'>'} New</strong>, paste the link.
                 </li>
               </ul>
             </div>
@@ -97,10 +178,10 @@ const LinkPage = ({ currentCalendar }) => {
         ) : (
           <button
             onClick={handleGenerateLink}
-            className={`bg-blue-500 text-white px-4 py-2 rounded ${loading ? "opacity-50" : ""}`}
+            className={`bg-lewisRedDarker text-white px-4 py-2 rounded ${loading ? "opacity-50" : ""}`}
             disabled={loading}
           >
-            {loading ? "Generating..." : "Generate ICS Link"}
+            {loading ? "Generating Link..." : "Generate ICS Link"}
           </button>
         )}
       </div>
@@ -111,14 +192,18 @@ const LinkPage = ({ currentCalendar }) => {
 LinkPage.propTypes = {
   currentCalendar: PropTypes.shape({
     className: PropTypes.string.isRequired,
-    startTime: PropTypes.string.isRequired,
-    endTime: PropTypes.string.isRequired,
-    academicTerm: PropTypes.string.isRequired,
-    firstDay: PropTypes.string.isRequired,
-    lastDay: PropTypes.string.isRequired,
-    daysOfClass: PropTypes.objectOf(PropTypes.bool).isRequired,
+    academicTerm: PropTypes.string,
+    firstDay: PropTypes.oneOfType([
+      PropTypes.instanceOf(Date),
+      PropTypes.shape({ toDate: PropTypes.func })
+    ]).isRequired,
+    lastDay: PropTypes.oneOfType([
+      PropTypes.instanceOf(Date),
+      PropTypes.shape({ toDate: PropTypes.func })
+    ]).isRequired,
     location: PropTypes.string,
     instructorName: PropTypes.string,
+    notes: PropTypes.string,
   }).isRequired,
 };
 

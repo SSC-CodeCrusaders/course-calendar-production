@@ -1,239 +1,243 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
-import { FiUser, FiMail, FiKey, FiEdit2 } from 'react-icons/fi';
+import { FiUser, FiMail, FiKey, FiEdit2, FiTrash2, FiChevronDown, } from 'react-icons/fi';
+import { auth } from '../utils/firebase';
+import { 
+  verifyBeforeUpdateEmail, 
+  onAuthStateChanged, 
+  updatePassword, 
+  reauthenticateWithCredential, 
+  EmailAuthProvider,  
+  deleteUser, 
+} from 'firebase/auth';
+import { purgeUserCalendars } from "../utils/firestoreDatabase";
+import { useNavigate } from "react-router-dom";
+import ReauthModal from "../Context/ReauthModal";
+
+const ActionButton = ({ icon: Icon, label, onClick }) => (
+  <button
+    onClick={onClick}
+    className="flex items-center w-full justify-between px-4 py-3 bg-lewisRed hover:bg-[#e00a4a] rounded-md transition"
+  >
+    <span className="flex items-center gap-2 text-white">
+      <Icon className="text-white" />
+      {label}
+    </span>
+    <FiChevronDown className="text-white" />
+  </button>
+);
 
 const UserProfile = () => {
+  // Uses useState to manage various states
   const [user, setUser] = useState(null);
-
   const [email, setEmail] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  const [newEmail, setNewEmail] = useState("");
+  const [pwdForm, setPwdForm] = useState({
+    current: "",
+    next: "",
+    confirm: "",
+  });
+
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showPwdForm, setShowPwdForm] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+
+  const [showReauthModal, setShowReauthModal] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [pendingDelete, setPendingDelete] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [showEmailForm, setShowEmailForm] = useState(false);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const getUserProfile = async () => {
-      const { data, error } = await supabase.auth.getSession();
-
-      if (error) {
-        toast.error('Failed to get user session');
-        return;
-      }
-
-      if (data.session) {
-        const user = data.session.user;
+    // uses Firebase's AuthStateChanged method to listen for authentication state changes
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // updates the new user and the new email
         setUser(user);
-        setEmail(user.email);
+        setEmail(user?.email || "");
+        setIsVerified(Boolean(user?.emailVerified));
       }
-    };
-
-    getUserProfile();
+    });
+    // removes the listener when the component unmounts
+    return () => unsubscribe();
   }, []);
 
   // Handle email update
   const handleUpdateEmail = async () => {
-    if (newEmail === email) {
-      toast.error('The new email cannot be the same as the current email');
-      return;
-    }
+    // if the user is not null then it simply just returns the function 
+    if (!user || !newEmail) return;
+    setPendingEmail(newEmail);
+    setShowReauthModal(true);
+  };
 
-    setLoading(true);
-
+  const completeEmailUpdate = async () => {
     try {
-      // Update user email using Supabase
-      const { error: emailError } = await supabase.auth.update({
-        email: newEmail,
-      });
-      if (emailError) {
-        toast.error('Failed to update email: ' + emailError.message);
-        return;
-      }
-
-      // Update email state and close form on success
-      setEmail(newEmail);
+      await verifyBeforeUpdateEmail(user, pendingEmail);
       setShowEmailForm(false);
-      toast.success('Email updated successfully');
+      setNewEmail("");
+      toast.success(`Verification email sent to ${pendingEmail}`);
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error("Failed to send verification email: " + error.message);
     } finally {
-      setLoading(false);
+      setPendingEmail("");
     }
   };
 
   // Handle password change
   const handleChangePassword = async () => {
-    if (newPassword !== confirmNewPassword) {
-      toast.error('New passwords do not match');
-      return;
+    const { current, next, confirm } = pwdForm;
+    if (!user) return;
+    if (next !== confirm) {
+      return toast.error("Passwords do not match.");
     }
-
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
+    if (next.length < 6) {
+      return toast.error("Password must be at least 6 characters long.")
     }
-
-    setLoading(true);
-
     try {
-      // Re-authenticate user with the current password
-      const { error: signInError } = await supabase.auth.signIn({
-        email,
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        toast.error('Current password is incorrect');
-        setLoading(false);
-        return;
-      }
-
-      // Update user password using Supabase
-      const { error: passwordError } = await supabase.auth.update({
-        password: newPassword,
-      });
-
-      if (passwordError) {
-        toast.error('Failed to update password: ' + passwordError.message);
-      } else {
-        setShowPasswordForm(false);
-        toast.success('Password updated successfully');
-      }
+      setLoading(true);
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, current));
+      // sets the new password
+      await updatePassword(user, next);
+      setShowPwdForm(false);
+      setPwdForm({ current: "", next: "", confirm: "" });
+      // prints it was successful
+      toast.success("Password update successfully.");
     } catch (error) {
-      toast.error('An unexpected error occurred while changing the password');
+      // Says there was an error
+      toast.error("Failed to update password: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Permanently delete your account and all calendars? This cannot be undone.")) return;
+    setPendingDelete(true);
+    setShowReauthModal(true);
+  };
+
+  const completeDeleteAccount = async () => {
+    try {
+      await purgeUserCalendars(user.uid);
+      await deleteUser(user);
+      localStorage.clear();
+      toast.success("Account deleted successfully.");
+      navigate("/", { replace: true });
+    } catch (err) {
+      toast.error("Delete failed: " + err.message);
+    }
+  };
+
+
   return (
-    <>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-        <div className="bg-white shadow-md rounded-lg w-full max-w-lg p-6">
-          <div className="flex items-center mb-6">
-            {/* User profile icon */}
-            <div className="bg-lewisRed text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold">
-              <FiUser />
-            </div>
-            <div className="ml-4">
-              <h1 className="text-2xl font-bold text-gray-800">Profile Information</h1>
-              <p className="text-sm text-gray-500">Update your personal information</p>
-            </div>
+    <div className="flex justify-center items-center min-h-screen bg-lewisRedDarker">
+      <div className="w-full max-w-lg bg-gray rounded-lg shadow p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <div className="bg-lewisRed text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl">
+            <FiUser />
           </div>
-
-          {/* Email Section */}
-          <div className="border-t border-gray-300 pt-4 mt-4">
-            <h2 className="text-lg font-bold text-gray-800 mb-2">Email</h2>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <FiMail className="text-gray-500 mr-3" />
-                <div>
-                  <p className="text-lg">{email ? email : <span className="text-gray-400">Loading...</span>}</p>
-                </div>
-              </div>
-              {/* Toggle email update form */}
-              <button
-                onClick={() => setShowEmailForm(!showEmailForm)}
-                className="flex items-center text-blue-500 hover:underline"
-              >
-                <FiEdit2 className="mr-1" /> Change Email
-              </button>
-            </div>
-
-            {/* Form to update email */}
-            {showEmailForm && (
-              <div className="mt-4">
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="w-full p-3 border rounded focus:outline-none focus:border-lewisRed mb-2"
-                  placeholder="Enter new email"
-                />
-                <button
-                  onClick={handleUpdateEmail}
-                  disabled={loading}
-                  className="w-full bg-lewisRed text-white p-3 rounded hover:bg-red-600 transition disabled:opacity-50"
-                >
-                  {loading ? 'Updating Email...' : 'Save Email'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Password Section */}
-          <div className="border-t border-gray-300 pt-4 mt-8">
-            <h2 className="text-lg font-bold text-gray-800 mb-2">Password</h2>
-            <button
-              onClick={() => setShowPasswordForm(!showPasswordForm)}
-              className="text-blue-500 hover:underline"
+          <div>
+            <p className="font-bold">{email || "Loading..."}</p>
+            <p 
+              className={
+                "text-sm" + 
+                (isVerified ? "text-green-600" : "text-red-600")
+              }
             >
-              Update Password
-            </button>
-
-            {/* Form to update password */}
-            {showPasswordForm && (
-              <div className="mt-4 space-y-4">
-                {/* Current Password Input */}
-                <div className="flex items-center">
-                  <FiKey className="text-gray-500 mr-3" />
-                  <div className="w-full">
-                    <label className="block text-sm font-semibold mb-1">Current Password</label>
-                    <input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full p-3 border rounded focus:outline-none focus:border-lewisRed"
-                    />
-                  </div>
-                </div>
-
-                {/* New Password Input */}
-                <div className="flex items-center">
-                  <FiKey className="text-gray-500 mr-3" />
-                  <div className="w-full">
-                    <label className="block text-sm font-semibold mb-1">New Password</label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full p-3 border rounded focus:outline-none focus:border-lewisRed"
-                    />
-                  </div>
-                </div>
-
-                {/* Confirm New Password Input */}
-                <div className="flex items-center">
-                  <FiKey className="text-gray-500 mr-3" />
-                  <div className="w-full">
-                    <label className="block text-sm font-semibold mb-1">Confirm New Password</label>
-                    <input
-                      type="password"
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                      className="w-full p-3 border rounded focus:outline-none focus:border-lewisRed"
-                    />
-                  </div>
-                </div>
-
-                {/* Update Password Button */}
-                <button
-                  onClick={handleChangePassword}
-                  disabled={loading}
-                  className="w-full bg-lewisRed text-white p-3 rounded hover:bg-red-600 transition disabled:opacity-50 mt-4"
-                >
-                  {loading ? 'Updating Password...' : 'Change Password'}
-                </button>
-              </div>
-            )}
+              {isVerified ? "Email Verified" : "Email Not Verified"}
+            </p>
           </div>
         </div>
+
+        {/* Account Actions */}
+        <section className="space-y-4">
+          <h2 className="font-bold text-lg">Account Actions</h2>
+
+          <ActionButton
+            icon={FiEdit2}
+            label="Change email"
+            onClick={() => setShowEmailForm((s) => !s)}
+          />
+
+          {showEmailForm && (
+            <div className="space-y-3 p-3 bg-gray rounded-md">
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="New email address"
+                className="w-full p-2 border rounded"
+              />
+              <button
+                onClick={handleUpdateEmail}
+                disabled={loading}
+                className="w-full bg-lewisRed text-white py-2 rounded disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+          )}
+
+          <ActionButton
+            icon={FiKey}
+            label="Change Password"
+            onClick={() => setShowPwdForm((s) => !s)}
+          />
+
+          {showPwdForm && (
+            <div className="space-y-3 p-3 bg-gray rounded-md">
+              <input
+                type="password"
+                placeholder="Current Password"
+                value={pwdForm.current}
+                onChange={(e) => setPwdForm((p) => ({ ...p, current: e.target.value }))}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="New Password"
+                value={pwdForm.next}
+                onChange={(e) => setPwdForm((p) => ({ ...p, next: e.target.value }))}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="Confirm New Password"
+                value={pwdForm.confirm}
+                onChange={(e) => setPwdForm((p) => ({ ...p, confirm: e.target.value }))}
+                className="w-full p-2 border rounded"
+              />
+              <button
+                onClick={handleChangePassword}
+                disabled={loading}
+                className="w-full bg-lewisRed text-white py-2 rounded disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+          )}
+
+          <ActionButton
+            icon={FiTrash2}
+            label="Delete Account"
+            onClick={handleDeleteAccount}
+          />
+        </section>
       </div>
-    </>
+      {showReauthModal && (
+        <ReauthModal
+          user={user}
+          onSuccess={pendingDelete ? completeDeleteAccount : completeEmailUpdate}
+          onClose={() => {
+            setShowReauthModal(false);
+            setPendingDelete(false);
+          }}
+        />
+      )}
+    </div>
   );
 };
 

@@ -1,94 +1,117 @@
 import { academicCalendar } from "./academicCalendar";
 
-/**
- * Checks if a given date is a holiday or within a holiday period.
- * @param {Date} date - The date to check.
- * @param {Array} holidays - Array of holiday objects.
- * @returns {boolean}
- */
-const isHoliday = (date, holidays) => {
+function normalizeDate(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function isHolidayNoClasses(date, holidays) {
+  const normDate = normalizeDate(date);
   return holidays.some((holiday) => {
-    if (holiday.date) {
-      const holidayDate = new Date(holiday.date);
-      return (
-        date.getFullYear() === holidayDate.getFullYear() &&
-        date.getMonth() === holidayDate.getMonth() &&
-        date.getDate() === holidayDate.getDate()
-      );
+    const nameContainsNoClasses =
+      holiday.name && holiday.name.toLowerCase().includes("no classes");
+    if (!nameContainsNoClasses) {
+      return false;
     }
-    if (holiday.start && holiday.end) {
-      const start = new Date(holiday.start);
-      const end = new Date(holiday.end);
-      return date >= start && date <= end;
+    if (holiday.date) {
+      const holidayDate = normalizeDate(new Date(holiday.date));
+      return normDate.getTime() === holidayDate.getTime();
+    } 
+    if (holiday.startDate && holiday.endDate) {
+      const start = normalizeDate(new Date(holiday.startDate));
+      const end = normalizeDate(new Date(holiday.endDate));
+      return normDate >= start && normDate <= end;
     }
     return false;
   });
-};
+}
 
-/**
- * Generates a schedule of class events excluding holidays.
- * @param {Object} data - The form data containing schedule details.
- * @returns {Array} - Array of class events.
- */
-export const generateSchedule = (data) => {
-  const {
+const dayToIndex = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+  };
+
+  function parseTimeRange(slot) {
+   try {
+    const [startStr, endStr] = slot.split(" - ");
+    const parse = (timeString) => {
+      const safeTime = timeString.replace(/([APap][Mm])$/, ' $1');
+      const d = new Date(`January 1, 2000 ${safeTime}`);
+      if (isNaN(d)) throw new Error("Invalid time: " + t);
+      return [d.getHours(), d.getMinutes()];
+    };
+    const [sh, sm] = parse(startStr);
+    const [eh, em] = parse(endStr);
+    return [sh, sm, eh, em];
+   } catch (err) {
+    console.error("Invalid slot time:", slot);
+    return [NaN, NaN, NaN, NaN];
+   }
+  }
+
+  export const generateSchedule = ({
     firstDay,
     lastDay,
-    daysOfClass,
+    selectedTimeSlots,
     instructorName,
     className,
     location,
     academicTerm,
-    startTime,
-    endTime,
     notes,
-  } = data;
-
-  const term = academicCalendar[academicTerm] || { holidays: [] };
-  const holidays = term.holidays;
-
+    reminderMinutes,
+  }) => {
+  const holidays = academicCalendar[academicTerm]?.holidays || [];
   const startDate = new Date(firstDay);
   const endDate = new Date(lastDay);
+  const events = [];
 
-  if (isNaN(startDate) || isNaN(endDate)) {
-    throw new Error("Invalid start or end date.");
-  }
+  const current = new Date(startDate);
 
-  const schedule = [];
-  let currentDate = new Date(startDate);
+  while(current <= endDate) {
+    const dayName = current.toLocaleString("en-US", { weekday: "long" }).toLowerCase();
+    const slots = selectedTimeSlots[dayName];
 
-  while (currentDate <= endDate) {
-    const dayName = currentDate
-      .toLocaleString("en-US", { weekday: "long" })
-      .toLowerCase();
+    const normalized = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+    const isHoliday = isHolidayNoClasses(normalized, holidays);
+    console.log(`[DEBUG] Date: ${normalized.toISOString()}`);
+    console.log(` Day: ${dayName}`);
+    console.log(` Slots:`, slots);
+    console.log(` Is Holiday (No Classes):`, isHoliday);
+    if (slots && slots.length > 0 && !isHoliday) {
+    
+      for (const slot of slots) {
+        const [sh, sm, eh, em] = parseTimeRange(slot);
+        const durationHours = eh - sh + (em - sm < 0 ? -1 : 0);
+        const durationMinutes = (em - sm + 60) % 60;
 
-    if (daysOfClass[dayName] && !isHoliday(currentDate, holidays)) {
-      const [startHour, startMinute] = startTime.split(":").map(Number);
-      const [endHour, endMinute] = endTime.split(":").map(Number);
-
-      const durationHours = endHour - startHour;
-      const durationMinutes = endMinute - startMinute;
-
-      schedule.push({
-        title: className,
-        start: [
-          currentDate.getFullYear(),
-          currentDate.getMonth() + 1,
-          currentDate.getDate(),
-          startHour,
-          startMinute,
-        ],
-        duration: {
-          hours: durationHours,
-          minutes: durationMinutes,
-        },
-        location: location,
-        description: `Instructor: ${instructorName}${notes ? ` Notes: ${notes}` : ""}`,
-      });
+        events.push ({
+          className,
+          instructorName,
+          location,
+          notes,
+          reminderMinutes,
+          slotLabel: slot,
+          start: new Date(
+            current.getFullYear(),
+            current.getMonth(),
+            current.getDate(),
+            sh,
+            sm
+          ),
+          startTime: `${sh}:${sm}`,
+          endTime: `${eh}:${em}`,
+          duration: {
+            hours: durationHours,
+            minutes: durationMinutes,
+          },
+        });
+      }
     }
-
-    currentDate.setDate(currentDate.getDate() + 1);
+    current.setDate(current.getDate() + 1);
   }
-
-  return schedule;
+  return events;
 };

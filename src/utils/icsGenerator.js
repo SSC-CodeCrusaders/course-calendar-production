@@ -1,73 +1,77 @@
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { createEvents } from "ics";
-import { supabase } from "./supabaseClient";
+import { storage } from "./firebase";
 
-/**
- * Generates an ICS file and uploads it to a Supabase bucket.
- * @param {Array} scheduleEvents - Array of class events.
- * @param {Array} holidayEvents - Array of holiday events.
- * @param {string} className - Name of the class for naming the ICS file.
- * @returns {string} Public URL of the uploaded ICS file.
- */
-export const generateICSAndUpload = async (scheduleEvents, holidayEvents, className) => {
-  const allEvents = [
-    ...scheduleEvents.map((event) => ({
-      title: event.title,
-      start: event.start,
-      duration: event.duration,
-      location: event.location,
-      description: event.description,
-    })),
-    ...holidayEvents.map((holiday) => ({
-      title: holiday.name,
-      start: [
-        holiday.date.getFullYear(),
-        holiday.date.getMonth() + 1,
-        holiday.date.getDate(),
-      ],
-      description: `${holiday.name} Holiday`,
-    })),
-  ];
+function calculateDuration(start, end) {
+  try {
+    const [startHour, startMinute] = start.split(":").map(Number);
+    const [endHour, endMinute] = end.split(":").map(Number);
+
+    let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+    if (totalMinutes < 0) totalMinutes += 24 * 60;
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return { hours: isNaN(hours) ? 1 : hours, minutes: isNaN(minutes) ? 0 : minutes };
+  } catch (e) {
+    return { hours: 1, minutes: 0 };
+  }
+}
+
+const escapeICS = (str = "") =>
+  str.replace(/\\/g, "\\\\")
+  .replace(/,/g, "\\,")
+  .replace(/;/g, "\\;")
+  .replace(/:/g, "\\:");
+
+export async function generateICSAndUpload(scheduleEvents, holidays, calendarName) {
+  const events = scheduleEvents.map((event) => {
+    const { hours, minutes } = calculateDuration(event.startTime, event.endTime);
+
+    const lines = [
+      `Instructor: ${event.instructorName}`,
+      event.notes ? `Notes: ${event.notes}` : null,
+    ].filter(Boolean);
+    const mRaw = Number(event.reminderMinutes);
+    const m = isNaN(m) ? 30 : mRaw;
+
+    return {
+      title: escapeICS(event.className),
+      location: escapeICS(event.location),
+      description: escapeICS(lines.join("\\n")),
+      start: (() => {
+        const d = new Date(event.start);
+        if (isNaN(d)) throw new Error("Invalid start date");
+        return [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes()];
+      })(),
+      duration: { hours, minutes },
+      ...(m > 0 && {
+        alarms: [{
+          action: "display",
+          trigger: { minutes: m, before: true },
+          description: "Reminder",
+        }]
+      })
+    };
+  });
 
   return new Promise((resolve, reject) => {
-    createEvents(allEvents, async (error, value) => {
+    createEvents(events, async (error, value) => {
       if (error) {
         console.error("ICS file generation error:", error);
         reject(new Error("Failed to generate ICS file: " + JSON.stringify(error)));
         return;
       }
 
+      const blob = new Blob([value], { type: "text/calendar" });
+      const fileRef = ref(storage, `ics/${calendarName}-${Date.now()}.ics`);
+
       try {
-        const fileName = `${className.replace(/\s+/g, "_")}.ics`;
-        const filePath = 'public/' + fileName;
-        const fileBody = new Blob([value], { type: "text/calendar;charset=utf-8" });
-
         console.log("Uploading ICS file...");
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("ics-files")
-          .upload(filePath, fileBody, { cacheControl: "3600", upsert: true });
-
-        if (uploadError) {
-          console.error("Upload error:", uploadError);
-          reject(new Error("Error uploading ICS file."));
-          return;
-        }
-
-        console.log("Upload successful:", uploadData);
-        
-
-        console.log("Generating Public URL...");
-        const { data, error } = await supabase.storage
-          .from('ics-files')
-          .getPublicUrl(filePath, 60);
-
-        if (error) {
-          console.error("Public URL error:", error);
-          reject(new Error("Error generating signed URL."));
-          return;
-        }
-
-        console.log("Generated Public URL:", data);
-        resolve(data);
+        await uploadBytes(fileRef, blob);
+        const url = await getDownloadURL(fileRef);
+        resolve(url);
+        console.log("Generated Public URL:", url);
       } catch (err) {
         console.error("Unexpected error during ICS upload process:", err);
         reject(err);
@@ -75,5 +79,3 @@ export const generateICSAndUpload = async (scheduleEvents, holidayEvents, classN
     });
   });
 };
-
-

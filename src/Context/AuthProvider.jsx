@@ -1,41 +1,42 @@
 import { createContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { supabase } from '../utils/supabaseClient';
+// imports to use to get firebase for authentication
+import { auth } from "../utils/firebase";
+import { onAuthStateChanged, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { updateUserEmailInFirestore } from "../utils/firestoreDatabase";
 
-// Create the Auth Context
+// Create the Auth Context allowing authentication data to be shared across the app
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Tracks the authenticated user
+  const [user, setUser] = useState(null); // Tracks the authenticated Firebase user
   const [loading, setLoading] = useState(true); // Tracks loading state for auth initialization
 
   useEffect(() => {
-    const initAuth = async () => {
-      // Fetch the session from Supabase
-      const { data, error } = await supabase.auth.getSession();
+    setPersistence(auth, browserLocalPersistence)
+    .then(() => console.log("Firebase persistence set to Local."))
+    .catch((error) => console.error("Error setting auth persistence: ", error));
 
-      if (error) {
-        console.error('Failed to fetch session:', error.message);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await user.reload();
+        setUser(user);
+        await updateUserEmailInFirestore(user.uid, user.email);
       } else {
-        setUser(data.session?.user || null); // Set user if session exists
+        setUser(null);
       }
+      setLoading(false);
+    });
 
-      setLoading(false); // Finished initializing auth
-
-      // Listen for authentication state changes
-      const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user || null);
-      });
-
-      return () => subscription?.unsubscribe(); // Clean up listener on unmount
-    };
-
-    initAuth();
+    // cleans up the listener on unmount to prevent memory leaks
+    return () => unsubscribe();
   }, []);
 
+  // Returns authentication data 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
-      {loading ? <div>Loading...</div> : children} {/* Display loading state */}
+    // this will return and make the variables user and loading available throughout the app
+    <AuthContext.Provider value={{ user, setUser, loading }}>
+      {loading ? <div>Loading...</div> : children} {/* Display loading state is loading is true*/}
     </AuthContext.Provider>
   );
 };

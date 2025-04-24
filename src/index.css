@@ -34,6 +34,10 @@ body {
   /* Secondary color */
 }
 
+.bg-accent {
+  background-color: #310310;
+}
+
 .text-gray {
   color: #d9d9d9;
   /* Gray text */
@@ -58,4 +62,23 @@ body {
   font-family: 'Crimson Text';
   src: url('/fonts/CrimsonText-Regular.ttf') format('truetype');
   font-weight: 400;
+}
+
+@layer utilities {
+  @keyframes slideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-10%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-slide-down {
+    animation: slideDown 0.2s ease-out forwards;
+  }
+  .border-lrb {
+    @apply border-l border-r border-b;
+  }
 }

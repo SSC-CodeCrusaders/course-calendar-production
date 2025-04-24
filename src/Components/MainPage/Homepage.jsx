@@ -1,12 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import Sidebar from "./Sidebar";
-import UserInputForm from "./UserInputForm";
 import CalendarPage from "./CalendarPage";
-import LinkPage from "./LinkPage";
-import ProgressBar from "./ProgressBar";
 import { AuthContext } from "../../Context/AuthProvider";
-import { fetchSchedules } from "../../utils/supabaseClient";
+import { deleteCalendar, fetchUserCalendars } from "../../utils/firestoreDatabase";
 import { toast } from "react-toastify";
+// imports added to use Firestore
 
 const Homepage = () => {
   const { user } = useContext(AuthContext);
@@ -15,33 +13,34 @@ const Homepage = () => {
   const defaultCalendar = {
     firstDay: "",
     lastDay: "",
-    startTime: "",
-    endTime: "",
-    daysOfClass: {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false,
-    },
     instructorName: "",
     className: "",
     location: "",
     notes: "",
-    page: 0,
   };
 
   const [calendars, setCalendars] = useState(() => {
     const storedCalendars = localStorage.getItem("calendars");
-    return storedCalendars ? JSON.parse(storedCalendars) : [defaultCalendar];
+    if (storedCalendars) {
+      try {
+        const parsed = JSON.parse(storedCalendars);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch {}
+    }
+    return [defaultCalendar];
   });
 
   const [currentIndex, setCurrentIndex] = useState(() => {
-    const storedIndex = localStorage.getItem("currentIndex");
-    return storedIndex ? parseInt(storedIndex, 10) : 0;
+    const storedIndex = parseInt(localStorage.getItem("currentIndex"), 10);
+    if (!isNaN(storedIndex) && storedIndex >= 0 && storedIndex < calendars.length) {
+      return storedIndex;
+    }
+    return 0;
   });
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Effect to sync calendars and currentIndex with localStorage
   useEffect(() => {
@@ -49,15 +48,16 @@ const Homepage = () => {
     localStorage.setItem("currentIndex", currentIndex);
   }, [calendars, currentIndex]);
 
-  // Effect to load schedules when user logs in or reset on logout
   useEffect(() => {
-    const loadSchedules = async () => {
+    async function loadCalendars() {
       if (user) {
         try {
-          const schedules = await fetchSchedules(user.id);
-          setCalendars(schedules.length > 0 ? schedules : [defaultCalendar]);
+          const fetched = await fetchUserCalendars();          
+          const toUse = Array.isArray(fetched) && fetched.length > 0 ? fetched : [defaultCalendar];
+          setCalendars(toUse);
+          setCurrentIndex(idx => Math.min(idx, toUse.length - 1));
         } catch (error) {
-          toast.error("Failed to load schedules from Supabase.");
+          toast.error("Failed to load calendars from Firestore.");
           console.error("Error loading calendars: ", error);
         }
       } else {
@@ -67,57 +67,55 @@ const Homepage = () => {
         localStorage.removeItem("calendars");
         localStorage.removeItem("currentIndex");
       }
-    };
-
-    loadSchedules();
+    }
+    loadCalendars();
   }, [user]);
 
   // Function to create a new calendar
   const createNewCalendar = () => {
-    setCalendars([...calendars, defaultCalendar]);
+    setCalendars(prev => [...prev, defaultCalendar]);
     setCurrentIndex(calendars.length); // Set the new calendar as active
   };
 
-  // Function to set the current page for a calendar
-  const setCurrentPage = (page) => {
-    setCalendars((prevCalendars) => {
-      const updatedCalendars = [...prevCalendars];
-      updatedCalendars[currentIndex].page = page;
-      return updatedCalendars;
-    });
-  };
-
-  const updateCalendarName = (index, newName) => {
-    setCalendars((prevCalendars) =>
-      prevCalendars.map((calendar, i) =>
-        i === index ? { ...calendar, className: newName } : calendar
-      )
+  const updateCalendarName = (i, name) =>
+    setCalendars(prev =>
+      prev.map((c, idx) => (idx === i ? { ...c, className: name } : c))
     );
+
+  const handleDeleteCalendar = async (calendarId) => {
+    if (calendars.length === 1) {
+      toast.error("Calendar deletion failed. Cannot delete last calendar.");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Delete Calendar?");
+    if (!confirmDelete) return;
+    const deletedIndex = calendars.findIndex((c) => c.id === calendarId);
+    await deleteCalendar(calendarId);
+    const updatedCalendars = calendars.filter((c) => c.id !== calendarId);
+    setCalendars(updatedCalendars);
+
+    if (deletedIndex === currentIndex) {
+      const nextIndex = deletedIndex >= updatedCalendars.length ? updatedCalendars.length - 1 : deletedIndex;
+      setCurrentIndex(nextIndex);
+    } else if (deletedIndex < currentIndex) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+
+    toast.success("Calendar deleted successfully.");
   };
   
   const renderCurrentPage = () => {
-    const currentCalendar = calendars[currentIndex];
-
-    // Ensure a valid page is always set
-    const page = currentCalendar.page ?? 0;
-
-    switch (page) {
-      case 0: // User Input
-        return (
-          <UserInputForm
-            currentIndex={currentIndex}
-            calendars={calendars}
-            setCalendars={setCalendars}
-          />
-        );
-      case 1: // Calendar Page
-        return <CalendarPage currentCalendar={currentCalendar} />;
-      case 2: // Link Page
-        return <LinkPage currentCalendar={currentCalendar} />;
-      default: // Fallback to User Input
-        setCurrentPage(0); // Automatically reset invalid page
-        return null; // Render nothing temporarily (until page resets)
-    }
+    const safeIndex = Math.max(0, Math.min(currentIndex, calendars.length - 1));
+    const currentCalendar = calendars?.[safeIndex];
+    return (
+      <CalendarPage
+        currentCalendar={currentCalendar}
+        currentIndex={currentIndex}
+        calendars={calendars}
+        setCalendars={setCalendars}
+      />
+    );  
   };
 
   return (
@@ -129,15 +127,15 @@ const Homepage = () => {
         setCurrentIndex={setCurrentIndex}
         createNewCalendar={createNewCalendar}
         updateCalendarName={updateCalendarName}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+        deleteCalendar={handleDeleteCalendar}
       />
+
       {/* Main Content */}
-      <div className="flex flex-col flex-grow p-4 overflow-y-auto">
-        {/* Progress Bar */}
-        <ProgressBar
-          currentPage={calendars[currentIndex]?.page || 0}
-          setCurrentPage={setCurrentPage}
-        />
-        {/* Page Content */}
+      <div className={`flex flex-col flex-grow p-4 overflow-y-auto transition-all duration-150
+                      ${isCollapsed ? "ml-12" : "ml-44"}`}>
+        {/* Render Active Page Content */}
         <div className="flex-grow">{renderCurrentPage()}</div>
       </div>
     </div>
