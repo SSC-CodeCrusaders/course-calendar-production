@@ -58,8 +58,9 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
   };
 
   const [selectedTerm, setSelectedTerm] = useState(currentCalendar.academicTerm || determineCurrentTerm());
-  const termStart = new Date(academicCalendar[selectedTerm]?.termStart);
-  const termEnd = new Date(academicCalendar[selectedTerm]?.termEnd);
+  const termData = academicCalendar[selectedTerm];
+  const termStart = termData ? new Date(termData.termStart) : new Date();
+  const termEnd = termData ? new Date(termData.termEnd) : new Date();
 
   useEffect(() => {
     const selectedTimeSlotsObject = {};
@@ -77,6 +78,8 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
           ...cal,
           selectedTimeSlots:selectedTimeSlotsObject,
           academicTerm:selectedTerm || "SP2025",
+          firstDay: new Date(academicCalendar[selectedTerm].termStart),
+          lastDay: new Date(academicCalendar[selectedTerm].termEnd),
           dirty: !noChange
         };
       })

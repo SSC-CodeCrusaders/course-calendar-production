@@ -158,7 +158,14 @@ const UserInputForm = ({ currentIndex, calendars, setCalendars }) => {
           </div>
 
           <div className="w-full md:w-1/2">
-            <h2 className="text-xl font-semibold mb-1">Selected Class Times:</h2>
+            <div className="flex flex-col mb-2">
+              <h2 className="text-xl font-semibold mb-1">Selected Class Times:</h2>
+              <span className="text-sm font-semibold">
+                {currentCalendar.academicTerm
+                  ? `Saved under ${currentCalendar.academicTerm}`
+                  : "No academic term selected yet."}
+              </span>
+            </div>
             <ul className="list-disc pl-5 text-black mb-4">
               {Object.entries(currentCalendar.selectedTimeSlots ?? {}).sort(([w1], [w2]) => 
                 WEEKDAY_ORDER.indexOf(w1) - WEEKDAY_ORDER.indexOf(w2)).map(([weekday, slots]) => (

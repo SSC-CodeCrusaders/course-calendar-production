@@ -33,7 +33,7 @@ export async function generateICSAndUpload(scheduleEvents, holidays, calendarNam
       event.notes ? `Notes: ${event.notes}` : null,
     ].filter(Boolean);
     const mRaw = Number(event.reminderMinutes);
-    const m = isNaN(m) ? 30 : mRaw;
+    const m = isNaN(mRaw) ? 30 : mRaw;
 
     return {
       title: escapeICS(event.className),
