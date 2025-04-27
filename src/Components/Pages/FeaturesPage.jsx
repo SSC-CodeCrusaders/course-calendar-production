@@ -4,12 +4,12 @@ import React from "react";
 
 const FeaturesPage = () => {
   return (<div className="relative w-screen h-screen">
-	<div className="absolute inset-0 bg-cover bg-center opacity-30 z-0"
+	<div className="absolute inset-0 bg-cover bg-center opacity-30 z-0 pointer-events-none"
 							style={{ 
 									backgroundImage: "url('/img/lewis_front.jpg')", 
 							}}
                 ></div>
-    <div className="container mx-auto px-8 py-12">
+    <div className="relative container mx-auto px-8 py-12 z-10">
       <h2 className="text-4xl font-bold mb-6 text-primary text-center">
         Key Features
       </h2>
@@ -39,7 +39,7 @@ const FeaturesPage = () => {
       </p>
       <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
         {/* Feature 1 */}
-        <li className="bg-gray-100 rounded-lg shadow-md p-6">
+        <li className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold mb-2 text-primary">
             Automatic .ics File Generation
           </h3>
@@ -50,7 +50,7 @@ const FeaturesPage = () => {
         </li>
 
         {/* Feature 2 */}
-        <li className="bg-gray-100 rounded-lg shadow-md p-6">
+        <li className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold mb-2 text-primary">
             Seamless Integration
           </h3>
@@ -61,7 +61,7 @@ const FeaturesPage = () => {
         </li>
 
         {/* Feature 3 */}
-        <li className="bg-gray-100 rounded-lg shadow-md p-6">
+        <li className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold mb-2 text-primary">
             User-Friendly Interface
           </h3>
@@ -72,7 +72,7 @@ const FeaturesPage = () => {
         </li>
 
         {/* Feature 4 */}
-        <li className="bg-gray-100 rounded-lg shadow-md p-6">
+        <li className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold mb-2 text-primary">
             Customizable Options
           </h3>
