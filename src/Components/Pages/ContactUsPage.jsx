@@ -67,6 +67,13 @@ const ContactUsPage = () => {
                     />
                 </div>
                 */}
+                {/* Background Image Overlay */}
+                <div
+                className="absolute inset-0 bg-cover bg-center opacity-30 z-0"
+                style={{
+            backgroundImage: "url('/img/lewis_front.jpg')",
+                }}
+                ></div>
                 <div className="mx-auto max-w-2xl text-center">
                     <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Contact Us</h2>
                     <p className="mt-2 text-lg/8 text-gray-600">We would be happy to hear your feedback.
