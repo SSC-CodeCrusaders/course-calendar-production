@@ -70,11 +70,11 @@ const ContactUsPage = () => {
                 <div className="mx-auto max-w-3xl text-center">
                     <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Contact Us</h2>
                     <p className="mt-2 text-lg/8 text-gray-600">
-						We would be happy to hear your feedback,
-						as well as answer any questions you may have.
-						<br />
-						(Submitting your feedback may or may not work as
-						this page is under development.)
+						          We would be happy to hear your feedback,
+						          as well as answer any questions you may have.
+						          <br />
+						          (Submitting your feedback may or may not work as
+						          this page is under development.)
                     </p>
                 </div>
                 {/* This was in the form field --> action="#" method="POST" */}
