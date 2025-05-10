@@ -3,7 +3,7 @@ import React from "react";
 
 
 const FeaturesPage = () => {
-  return (<div className="relative w-screen h-screen">
+  return (<div className="relative min-h-full">
 	<div className="absolute inset-0 bg-cover bg-center opacity-30 z-0 pointer-events-none"
 							style={{ 
 									backgroundImage: "url('/img/lewis_front.jpg')", 

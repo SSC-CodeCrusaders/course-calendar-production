@@ -3,15 +3,16 @@ import React from 'react';
 const AboutUsPage = () => {
   return (
     <>
-      <div className="p-1 bg-lewisRed text-white text-5xl text-center font-bold">About Us</div>
-      <div className="p-3 bg-lewisRed text-white text-xl text-center">Meet the Team Behind the Project</div>
-      
-      <div className="relative w-screen h-screen">
+      <div className="relative min-h-full">
         <div className="absolute inset-0 bg-cover bg-center opacity-30 z-0 mt--4"
         style={{
           backgroundImage: "url('/img/lewis_front.jpg')",
         }}
         ></div>
+		<div className="relative p-1 bg-lewisRed text-white text-5xl text-center font-bold z-10">About Us</div>
+      <div className="relative p-3 bg-lewisRed text-white text-xl text-center z-10">Meet the Team Behind the Project</div>
+      
+      
         <div>
           <div className=' p-1 mt-0 font-bold text-2xl text-center text-black relative z-10'>Main Developers</div>
           <div className="mx-4 w-90 h-2 bg-black rounded relative z-10"></div>

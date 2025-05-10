@@ -30,20 +30,20 @@ import React from "react";
 const FaqPage = () => {
   return (
     <>
-      <div className="p-2 bg-lewisRed text-white text-3xl text-center font-bold">
-        FREQUENTLY ASKED QUESTIONS
-      </div>
-      <div className="p-3 bg-lewisRed text-white text-xl text-center">
-        Have questions? Check the below FAQs
-      </div>
-
-      <div className="relative w-screen h-screen">
+      <div className="relative min-h-full">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-30 z-0 mt--4"
           style={{
             backgroundImage: "url('/img/lewis_front.jpg')",
           }}
         ></div>
+
+      <div className="relative p-2 bg-lewisRed text-white text-3xl text-center font-bold z-10">
+        FREQUENTLY ASKED QUESTIONS
+      </div>
+      <div className="relative p-3 bg-lewisRed text-white text-xl text-center z-10">
+        Have questions? Check the below FAQs
+      </div>
 
         <div className="relative z-10 p-6">
           <div className="bg-white rounded-lg shadow-md p-4 max-w-4xl mx-auto">
