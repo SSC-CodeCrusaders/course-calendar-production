@@ -52,8 +52,7 @@ const ContactUsPage = () => {
     }
 
     return (
-        <>
-            <div className="isolate bg-white px-6 py-20 sm:py-10 lg:px-8">
+            <div className="relative isolate px-6 pt-20 sm:pt-10 lg:px-8 min-h-full">
                 {/*
                 <div aria-hidden="true"
                     className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]">
@@ -67,7 +66,13 @@ const ContactUsPage = () => {
                     />
                 </div>
                 */}
-                <div className="mx-auto max-w-3xl text-center">
+				{/* Background Image Overlay */}
+				<div className="absolute inset-0 bg-cover bg-center opacity-30 z-0 pointer-events-none"
+					style={{ 
+							backgroundImage: "url('/img/lewis_front.jpg')", 
+					}}
+	            ></div>
+                <div className="relative mx-auto max-w-3xl text-center z-10">
                     <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Contact Us</h2>
                     <p className="mt-2 text-lg/8 text-gray-600">
 						          We would be happy to hear your feedback,
@@ -78,7 +83,7 @@ const ContactUsPage = () => {
                     </p>
                 </div>
                 {/* This was in the form field --> action="#" method="POST" */}
-                <form className="mx-auto mt-10 max-w-xl sm:mt-5">
+                <form className="relative mx-auto mt-10 max-w-xl sm:mt-5 z-10">
                     <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
                         <div>
                             <label htmlFor="first-name" className="block text-sm/6 font-semibold text-gray-900">
@@ -205,7 +210,6 @@ const ContactUsPage = () => {
                     </div>
                 </form>
             </div>
-        </>
     )
 }
 

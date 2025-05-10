@@ -28,7 +28,7 @@ export default function App() {
 
   return (
     <Router>
-      <div className="pt-20">
+      <div className="pt-20 h-full">
         <Header user={user} setUser={setUser} />
         <Routes>
           {/* Public Routes */}
