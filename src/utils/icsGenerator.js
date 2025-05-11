@@ -33,7 +33,7 @@ export async function generateICSAndUpload(scheduleEvents, holidays, calendarNam
       event.notes ? `Notes: ${event.notes}` : null,
     ].filter(Boolean);
     const mRaw = Number(event.reminderMinutes);
-    const m = isNaN(m) ? 30 : mRaw;
+    const m = isNaN(mRaw) ? 30 : mRaw;
 
     return {
       title: escapeICS(event.className),
@@ -45,13 +45,18 @@ export async function generateICSAndUpload(scheduleEvents, holidays, calendarNam
         return [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes()];
       })(),
       duration: { hours, minutes },
-      ...(m > 0 && {
-        alarms: [{
-          action: "display",
-          trigger: { minutes: m, before: true },
-          description: "Reminder",
-        }]
-      })
+      alarms: [
+        m > 0
+          ? {
+            action: "display",
+            trigger: { minutes: m, before: true },
+            description: "Reminder",
+          }
+          : {
+            action: "none",
+            description: "No reminder",
+          }
+      ],
     };
   });
 
