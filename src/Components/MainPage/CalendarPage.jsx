@@ -276,13 +276,17 @@ const CalendarPage = ({ currentCalendar, currentIndex, calendars, setCalendars }
         </div>
         <div className="flex justify-end mt-2 pr-1">
           <span className={`text-sm font-semibold 
-            ${currentCalendar.dirty 
-              ? "text-orange-500" 
-              : currentCalendar.id
-                ? "text-green-500"
-                : "text-red-500"}`}
+            ${!user
+              ? "text-blue-600"
+              : currentCalendar.dirty 
+                ? "text-orange-500" 
+                : currentCalendar.id
+                  ? "text-green-500"
+                  : "text-red-500"}`}
           >
-            {currentCalendar.dirty 
+            {!user
+            ? "Guest Mode - Calendars will not be saved."
+            : currentCalendar.dirty 
               ? "Unsaved changes" 
               : currentCalendar.id
                 ? "Saved"
