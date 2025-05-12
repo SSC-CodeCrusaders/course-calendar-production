@@ -1,3 +1,4 @@
+FatDoinks Team members: 
 * Matthew Shouse  
 * Jason Yescas  
 * Nikhila Gonuguntla
