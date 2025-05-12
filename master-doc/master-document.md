@@ -64,15 +64,16 @@ Make a pull request for review
 * Jason Yescas  
 * Nikhila Gonuguntla
 
-Course Calendar \- Production Repository: [https://github.com/SSC-CodeCrusaders/course-calendar-production](https://github.com/SSC-CodeCrusaders/course-calendar-production)  
-Course Calendar \- Website Repository:  
-[https://github.com/SSC-CodeCrusaders/course-calendar-website](https://github.com/SSC-CodeCrusaders/course-calendar-website)   
-Course Calendar \- About Us Repository:  
-[https://github.com/SSC-CodeCrusaders/about-us](https://github.com/SSC-CodeCrusaders/about-us)   
-Course Calendar \- Main Site  
-[https://lewiscal.azurewebsites.net](https://lewiscal.azurewebsites.net)   
-Course Calendar \- Staging Site  
-[https://lewiscalstaging-argzftajfhd9anan.centralus-01.azurewebsites.net/](https://lewiscalstaging-argzftajfhd9anan.centralus-01.azurewebsites.net/)   
+Course Calendar \- Production Repository: [https://github.com/SSC-CodeCrusaders/course-calendar-production](https://github.com/SSC-CodeCrusaders/course-calendar-production)
+
+Course Calendar \- Website Repository:  [https://github.com/SSC-CodeCrusaders/course-calendar-website](https://github.com/SSC-CodeCrusaders/course-calendar-website)
+
+Course Calendar \- About Us Repository:  [https://github.com/SSC-CodeCrusaders/about-us](https://github.com/SSC-CodeCrusaders/about-us)
+
+Course Calendar \- Main Site  [https://lewiscal.azurewebsites.net](https://lewiscal.azurewebsites.net)
+
+Course Calendar \- Staging Site  [https://lewiscalstaging-argzftajfhd9anan.centralus-01.azurewebsites.net/](https://lewiscalstaging-argzftajfhd9anan.centralus-01.azurewebsites.net/)
+
 ---
 
 **Definition of Done**: Being able to demo the product during production. It also validates that the product meets the customer's standards via communication with the product owner.  
@@ -85,7 +86,8 @@ Course Calendar \- Staging Site
 [LewisCal Flyer](https://docs.google.com/document/d/1mtjWxMlA68fAdnP-R0oTtqGmLa98nPD-ShmYdecQ5aw/edit?usp=sharing) (NOT USED AND NOT THAT GOOD)  
 [LewisCal Flyer](https://www.canva.com/design/DAGgRjvQ3tQ/U0Nk_sG__iklqD0f3Rl2qg/edit?utm_content=DAGgRjvQ3tQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton) (PROPER FLYER)  
 [LewisCal\_poster](https://docs.google.com/presentation/d/1yPyt8_I_lE5XsnBqv4dRZMjFftqxmKP026j5Nzv-nrw/edit?usp=sharing)  
-(The flyer above I made in about 5 minutes and it sucks ass.  Just did it for the discussion)  
+
+
 **Sprint Backlogs:**  
 [FatDoinks CCEDM Sheet](https://docs.google.com/spreadsheets/d/1u-qu6MmdiWKcpN1mbgG10cBiJKGYVagRQq1iZPnCFYA/edit?usp=sharing)  
 [Sprint 5 Backlog](https://docs.google.com/document/d/1mZErI63zGffExIxG8Amy3Zz4CxpK7i-tac2Q_WzqnO4/edit?usp=sharing)  
