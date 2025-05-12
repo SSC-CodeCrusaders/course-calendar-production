@@ -1,6 +1,9 @@
 FatDoinks Team members:
+
 Matthew Shouse
+
 Jason Yescas
+
 Nikhila Gonuguntla
 
 Course Calendar - Production Repository: https://github.com/SSC-CodeCrusaders/course-calendar-production
