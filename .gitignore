@@ -28,3 +28,5 @@ cors.json
 # Ignore workflow files
 main_lewiscal.yml
 staging_lewiscal-staging.yml
+
+/master-doc/
