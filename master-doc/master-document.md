@@ -22,8 +22,7 @@ Course Calendar \- Staging Site  [https://lewiscalstaging-argzftajfhd9anan.centr
 [LewisCal Overview](https://docs.google.com/document/d/1NR1bwqwZYGaccGfkwJTPPS9Yr7gEuEro4vg8tgmwWq4/edit?usp=sharing)  
 [LewisCal Guide](https://docs.google.com/document/d/1Bfnod8wtig07FH0BNoe64O3w2T7Eke118bIvTKwl0SA/edit?tab=t.0)  
 [FatDoinks Product Backlog](https://docs.google.com/document/d/1Iaj5y_Erjdmu2gNuOiiQpGDtygFBRyMZrh-HFYZN9-Q/edit?usp=sharing)  
-[LewisCal Flyer](https://docs.google.com/document/d/1mtjWxMlA68fAdnP-R0oTtqGmLa98nPD-ShmYdecQ5aw/edit?usp=sharing) (NOT USED AND NOT THAT GOOD)  
-[LewisCal Flyer](https://www.canva.com/design/DAGgRjvQ3tQ/U0Nk_sG__iklqD0f3Rl2qg/edit?utm_content=DAGgRjvQ3tQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton) (PROPER FLYER)  
+[LewisCal Flyer](https://www.canva.com/design/DAGgRjvQ3tQ/U0Nk_sG__iklqD0f3Rl2qg/edit?utm_content=DAGgRjvQ3tQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton) 
 [LewisCal\_poster](https://docs.google.com/presentation/d/1yPyt8_I_lE5XsnBqv4dRZMjFftqxmKP026j5Nzv-nrw/edit?usp=sharing)  
 
 
