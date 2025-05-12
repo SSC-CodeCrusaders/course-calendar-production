@@ -4,10 +4,15 @@ Jason Yescas
 Nikhila Gonuguntla
 
 Course Calendar - Production Repository: https://github.com/SSC-CodeCrusaders/course-calendar-production
+
 Course Calendar - Website Repository: https://github.com/SSC-CodeCrusaders/course-calendar-website 
+
 Course Calendar - About Us Repository: https://github.com/SSC-CodeCrusaders/about-us 
+
 Course Calendar - Main Site: https://lewiscal.azurewebsites.net 
+
 Course Calendar - Staging Site: https://lewiscalstaging-argzftajfhd9anan.centralus-01.azurewebsites.net/ 
+
 
 Definition of Done: Being able to demo the product during production. It also validates that the product meets the customer's standards via communication with the product owner.
 Capstone Definition of Done: Each story must be deployed to production & demo-able by 10:59pm on the Sunday at the end of each sprint.
